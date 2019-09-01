@@ -45,6 +45,8 @@ class PackagingUnitThread implements Runnable {
     GoDown goDown;
     int currBottleToDraw;
     boolean empty;
+    int b1;
+    int b2;
     PackagingUnitThread(Phaser p, String name,Bottles bottle,Tray sealingTray,Tray B1Tray,Tray B2Tray
                             ,UnfinishedTray unfinishedTray,GoDown goDown)
 	{ 
@@ -58,8 +60,10 @@ class PackagingUnitThread implements Runnable {
         this.unfinishedTray = unfinishedTray;
         this.processingTime = 0;
         this.goDown = goDown;
-        this.currBottleToDraw = 2;
+        this.currBottleToDraw = 1;
         this.empty=true;
+        b1=0;
+        b2=0;
 		phsr.register(); 
 		new Thread(this).start(); 
 	} 
@@ -75,11 +79,13 @@ class PackagingUnitThread implements Runnable {
             // System.out.println("Currently Processing Bottle :" + Integer.toString(this.currentBottle.id));
             this.processingTime++;
             if(this.empty==false && this.processingTime<3){
-                System.out.println("Packaging Unit: Currently Processing Bottle :" + Integer.toString(this.currentBottle.id));
+                System.out.println("Packaging Unit: Currently Processing Bottle :" + Integer.toString(this.currentBottle.type));
             }
             else{
                 if(this.processingTime>=3 && this.empty==false){
                     this.currentBottle.packagingStatus =true;
+                    if(this.currentBottle.type==1) b1++;
+                    else b2++;
                     System.out.println("Packaging DONE!!" + Integer.toString(this.currentBottle.type) + " "+  Integer.toString(this.currentBottle.id));
                     if(this.currentBottle.sealingStatus == true){
                         if(this.currentBottle.type == 1){
@@ -89,10 +95,11 @@ class PackagingUnitThread implements Runnable {
                         this.empty=true;
                         System.out.println("DONE!!" + Integer.toString(this.currentBottle.type));
                     }
-                    else if(this.currentBottle.type == 1 && this.sealingTray.currentBottlesNum < this.sealingTray.size){
+                    else if(this.sealingTray.currentBottlesNum < this.sealingTray.size){
                         int curr = this.sealingTray.currentBottlesNum;
                         this.sealingTray.bottlesId[curr] = this.currentBottle;
                         this.sealingTray.currentBottlesNum++;
+                        System.out.println("transferred to sealing Tray "+ Integer.toString(this.currentBottle.type) + " "+  Integer.toString(this.currentBottle.id));
                         this.empty=true;
                     }
                 }
@@ -104,7 +111,7 @@ class PackagingUnitThread implements Runnable {
                         else{
                             Bottles bottle = new Bottles(unfinishedTray.id++, this.currBottleToDraw);
                             this.currentBottle = bottle;
-                            System.out.println("Bottle drawn by Packaging Unit from Unfinished Tray !! of type:" + Integer.toString(this.currentBottle.id));
+                            System.out.println("Bottle drawn by Packaging Unit from Unfinished Tray !! of type:" + Integer.toString(this.currentBottle.type));
                             if(this.currentBottle.type==1) {
                                 unfinishedTray.totalB1--;
                                 if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
@@ -191,7 +198,8 @@ class SealingUnitThread implements Runnable {
     UnfinishedTray unfinishedTray;
     int processingTime;
     boolean empty;
-
+    int b1;
+    int b2;
     GoDown goDown;
     int currBottleToDraw;
 
@@ -207,9 +215,10 @@ class SealingUnitThread implements Runnable {
         this.unfinishedTray = unfinishedTray;
         this.processingTime = 0;
         this.goDown = goDown;
-        this.currBottleToDraw =  1;
+        this.currBottleToDraw =  2;
         this.empty=true;
-
+        b1 = 0;
+        b2=0;
 		phsr.register(); 
 		new Thread(this).start(); 
 	}  
@@ -224,10 +233,12 @@ class SealingUnitThread implements Runnable {
             
             this.processingTime++;
             if(this.empty==false && this.processingTime<2){
-                System.out.println("Sealing Unit: Currently Processing Bottle :" + Integer.toString(this.currentBottle.id));
+                System.out.println("Sealing Unit: Currently Processing Bottle :" + Integer.toString(this.currentBottle.type));
             }
             else{
                 if(this.processingTime>=2 && this.empty==false){
+                    if(this.currentBottle.type==1) b1++;
+                    else b2++;
                     System.out.println("Sealing DONE!!" + Integer.toString(this.currentBottle.type) + " "+  Integer.toString(this.currentBottle.id));
                     this.currentBottle.sealingStatus= true;
                     if(this.currentBottle.packagingStatus == true){
@@ -242,12 +253,15 @@ class SealingUnitThread implements Runnable {
                         int curr = this.B1PackagingTray.currentBottlesNum;
                         this.B1PackagingTray.bottlesId[curr] = this.currentBottle;
                         this.B1PackagingTray.currentBottlesNum++;
+                        System.out.println("transferred to B1 Tray "+ Integer.toString(this.currentBottle.type) + " "+  Integer.toString(this.currentBottle.id));
+                       
                         this.empty = true;
                     }
                     else if(this.currentBottle.type == 2 && this.B2PackagingTray.currentBottlesNum < this.B2PackagingTray.size){
                         int curr = this.B2PackagingTray.currentBottlesNum;
                         this.B2PackagingTray.bottlesId[curr] = this.currentBottle;
                         this.B2PackagingTray.currentBottlesNum++;
+                        System.out.println("transferred to B2 Tray "+ Integer.toString(this.currentBottle.type) + " "+  Integer.toString(this.currentBottle.id));
                         this.empty = true;
                     }
                 }
@@ -274,7 +288,7 @@ class SealingUnitThread implements Runnable {
                                 unfinishedTray.currBottleToDraw = -1; 
                             }
                             this.empty=false;
-                            System.out.println("Bottle drawn by Sealing Unit from Unfinished Tray !! of type:" + Integer.toString(this.currentBottle.id));
+                            System.out.println("Bottle drawn by Sealing Unit from Unfinished Tray !! of type:" + Integer.toString(this.currentBottle.type));
                         }
                     }
                     else{
@@ -376,13 +390,17 @@ public class Manufacturing{
         Tray traySealing = new Tray(3,2);
         GoDown goDown = new GoDown(); 
 
-        new PackagingUnitThread(phsr,"Packaging Unit",null,traySealing,B1trayPackaging,B2trayPackaging,unfinishedTray,goDown);
-        new SealingUnitThread(phsr,"Sealing Unit",null,traySealing,B1trayPackaging,B2trayPackaging,unfinishedTray,goDown);
+        PackagingUnitThread pkg  =new PackagingUnitThread(phsr,"Packaging Unit",null,traySealing,B1trayPackaging,B2trayPackaging,unfinishedTray,goDown);
+        SealingUnitThread slg =  new SealingUnitThread(phsr,"Sealing Unit",null,traySealing,B1trayPackaging,B2trayPackaging,unfinishedTray,goDown);
         
         while (!phsr.isTerminated()) { 
 			phsr.arriveAndAwaitAdvance(); 
         }
-         
+        System.out.println(Integer.toString(pkg.b1));
+        System.out.println(Integer.toString(pkg.b2));
+        System.out.println(Integer.toString(slg.b1));
+        System.out.println(Integer.toString(slg.b2));
+        
 		System.out.println("The phaser is terminated\n");
 
     }
