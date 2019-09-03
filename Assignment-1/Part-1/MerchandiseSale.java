@@ -120,7 +120,7 @@ class Inventory{
 	}
 
 
-	synchronized public void processOrder(int orderId,char type,int quantity){
+	public void processOrder(int orderId,char type,int quantity){
 		
 		switch (type) {
 			case 'S': if(this.countS<quantity){
@@ -128,7 +128,10 @@ class Inventory{
 							this.displayInventory();
 						}
 						else{
-							this.countS -= quantity;
+							
+							synchronized((Integer)this.countS){
+								this.countS -= quantity;
+							}
 							System.out.println("Order "+ Integer.toString(orderId)+ " is successful.");
 							this.displayInventory();
 						}		
@@ -139,7 +142,9 @@ class Inventory{
 						this.displayInventory();
 					}
 				else{
-					this.countM -= quantity;
+					synchronized((Integer)this.countM){
+						this.countM -= quantity;
+					}
 					System.out.println("Order "+ Integer.toString(orderId)+ " is successful.");
 					this.displayInventory();
 				}
@@ -149,7 +154,9 @@ class Inventory{
 					this.displayInventory();
 				}
 				else{
-					this.countL -= quantity;
+					synchronized((Integer)this.countL){
+						this.countL -= quantity;
+					}
 					System.out.println("Order "+ Integer.toString(orderId)+ " is successful.");
 					this.displayInventory();
 				}		
@@ -159,7 +166,9 @@ class Inventory{
 					this.displayInventory();
 				}
 				else{
-					this.countC -= quantity;
+					synchronized((Integer)this.countC){
+						this.countC -= quantity;
+					}
 					System.out.println("Order "+ Integer.toString(orderId)+ " is successful.");
 					this.displayInventory();
 				}		
