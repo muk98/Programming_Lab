@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.concurrent.CyclicBarrier;
 import java.io.File;
 import java.util.Scanner;
-
+import javax.swing.*; 
 
  class Pair<A, B> {
     public A first;
@@ -14,6 +14,7 @@ import java.util.Scanner;
         this.second = second;
     }
  }
+ 
     
 class TrafficLight implements Runnable{
     int id;
@@ -33,33 +34,32 @@ class TrafficLight implements Runnable{
     {
         Integer tid=((time)/60)%3;
         tid++;
+        System.out.println(Integer.toString(carId));
         if(id==tid && waitlist.isEmpty())
         {
             Integer ans=0;
             if(time%60>54)
             {
-                ans+=120+60-time%60;
+                ans+=120+60-time%60+1;
                 Pair<Integer,Integer> t =new Pair(carId,ans);
                 waitlist.add(t); 
             }
             else{
+                
                finishlist.add(carId);
             }        
         }
         else if(waitlist.isEmpty())
         {
             
-            Integer ans= 60*((time)/60)+60*((id-tid+3)%3)-time;
-            if(ans%60>54)
-                ans+=120+60-ans%60;
+            Integer ans = 60*((time)/60)+60*((id-tid+3)%3)-time+1;
             Pair<Integer,Integer> t =new Pair(carId,ans);
             waitlist.add(t); 
         }
         else 
         {
-            Integer ans=waitlist.getLast().second;
-            if(ans%60>54)
-                ans+=180-ans%60;
+            Integer ans = waitlist.getLast().second;
+            
             Pair<Integer,Integer> t =new Pair(carId,ans);
             waitlist.add(t);
         }
@@ -71,41 +71,61 @@ class TrafficLight implements Runnable{
             Iterator<Pair<Integer,Integer>> iterator=waitlist.iterator();
             while(iterator.hasNext())
             {
-               
-                (iterator.next()).second--;
-                if(iterator.next().second<=0)
+                Pair<Integer,Integer> t = iterator.next();
+                t.second--;
+                if(t.second<=0)
                 {
-                    finishlist.add((iterator.next()).first);
-                    waitlist.remove(iterator.next());
+                    finishlist.add(t.first);
+                    waitlist.remove(t);
                 }
             }
         }
     }
 
     public void run(){
-
+        while(true){
         Integer time = TrafficLightSystem.time;
         if(TrafficLightSystem.idTimeMap.containsKey(time))
         {
-            
+          
             Iterator<Integer> iterator = TrafficLightSystem.idTimeMap.get(time).iterator();
             while(iterator.hasNext()) {
-                Pair<Character,Character> car = TrafficLightSystem.idDirMap.get(iterator.next());
-                if(id==1 && car.first=='S' && car.second=='E')
+                Integer id = iterator.next();
+                // System.out.println(id);
+                Pair<Character,Character> car = TrafficLightSystem.idDirMap.get(id);
+                if(this.id==1 && car.first=='S' && car.second=='E')
                 {
-                   emptyWait(time,iterator.next());
+                    
+                    emptyWait(time,id);
                 }
-                else if(id==2 && car.first=='W'&&car.second=='S')
+                else if(this.id==2 && car.first=='W' && car.second=='S')
                 {
-                    emptyWait(time,iterator.next());
+                    emptyWait(time,id);
                 }
-                else if(id==3 && car.first=='E'&&car.second=='W')
+                else if(this.id==3 && car.first=='E' && car.second=='W')
                 {
-                    emptyWait(time,iterator.next());
+                    emptyWait(time,id);
                 }
             }   
         }
         updateList();
+        try
+        {
+            TrafficLightSystem.newBarrier.await();
+        }
+        catch(Exception e)
+        {
+
+        }
+        try
+        { 
+            Thread.sleep(10);
+        }  
+        catch (Exception e)  
+        { 
+            
+        }         
+    }
     }
 }
 
@@ -119,29 +139,51 @@ class UnrestrictedDir implements Runnable{
 
     public void run()
     {
+        while(true){
         int time = TrafficLightSystem.time;
         if(TrafficLightSystem.idTimeMap.containsKey(time))
         {
             
             Iterator<Integer> iterator = TrafficLightSystem.idTimeMap.get(time).iterator();
             while(iterator.hasNext()) {
-                Pair<Character,Character>  car = TrafficLightSystem.idDirMap.get(iterator.next());
+                Integer carId=iterator.next();
+                Pair<Character,Character>  car = TrafficLightSystem.idDirMap.get(carId);
                 if(car.first=='S' && car.second=='W')
                 {
-                   finishlist.add(iterator.next());
+                   finishlist.add(carId);
                 }
                 else if(car.first=='E'&&car.second=='S')
                 {
-                    finishlist.add(iterator.next());
+                    finishlist.add(carId);
                 }
                 else if(car.first=='W'&&car.second=='E')
                 {
-                    finishlist.add(iterator.next());
+                    finishlist.add(carId);
                 }
             }   
         }
+        try
+        {
+            TrafficLightSystem.newBarrier.await();
+        }
+        catch(Exception e)
+        {
+
+        }
+
+        try
+            { 
+                Thread.sleep(10);
+            }  
+            catch (Exception e)  
+            { 
+                
+            } 
     }
+}
+    
 }   
+
 
 class InputFormat{
     char inDir;
@@ -161,15 +203,22 @@ public class TrafficLightSystem implements Runnable{
     public static CyclicBarrier newBarrier = new CyclicBarrier(5);
     public static HashMap<Integer,List<Integer>> idTimeMap;
     public static HashMap<Integer,Pair<Character,Character>> idDirMap;    
-    Thread contThread;
-
-    public void main(String[] args){
+    
+    public static void main(String[] args){
         File file = new File("input.txt");
-        Scanner input = new Scanner(file);
+        Scanner input=new Scanner(System.in);
+        try {
+            input = new Scanner(file);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        
+        
+
         Integer id=0;
         idTimeMap =new HashMap<>();
         idDirMap=new HashMap<>();
-        
+            
         while (input.hasNextLine()){
             String[] line = input.nextLine().split("@",3);
             Integer arrivalTime = Integer.parseInt(line[2]);
@@ -184,11 +233,14 @@ public class TrafficLightSystem implements Runnable{
             }
             idTimeMap.get(arrivalTime).add(id++);
         }
+        input.close();
+        // System.out.println(idDirMap);
+        // System.out.println(idTimeMap);
         
-        // TrafficLightSystem controller = new TrafficLightSystem();
-
-        // contThread = new Thread(controller);
-        // contThread.run();
+        TrafficLightSystem controller = new TrafficLightSystem();
+       
+        Thread contThread = new Thread(controller);
+        contThread.run();
     }  
 
     public void run(){
@@ -198,19 +250,38 @@ public class TrafficLightSystem implements Runnable{
         TrafficLight l2 = new TrafficLight(2);
         TrafficLight l3 = new TrafficLight(3);
         UnrestrictedDir d=new UnrestrictedDir();
+        
 
         
         Thread t1 = new Thread(l1);
         Thread t2 = new Thread(l2);
         Thread t3 = new Thread(l3);
+        Thread t4 = new Thread(d);
 
         t1.start();
         t2.start();
         t3.start();
-        
+        t4.start();
+
         while(true){
-            this.contThread.sleep(1000);
-            TrafficLightSystem.newBarrier.await();
+            try
+            { 
+                Thread.sleep(1000);
+            }  
+            catch (Exception e)  
+            { 
+                
+            } 
+            try
+            { 
+                TrafficLightSystem.newBarrier.await();
+            }  
+            catch (Exception e)  
+            { 
+            
+            } 
+            
+            System.out.println(time);
             time++;
             this.printDetails(l1,l2,l3,d);
             }
@@ -242,11 +313,12 @@ public class TrafficLightSystem implements Runnable{
             System.out.println("|        T3         |    Red      |    --     |" );
         }
         
-        
+    
         
         Iterator iterator1= l1.waitlist.iterator();
-
+        
         while(iterator1.hasNext()){
+            System.out.println("T1 Waiting..");
             Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator1.next();
             int id = t.first;
             Pair<Character,Character> c= ( Pair<Character,Character>) TrafficLightSystem.idDirMap.get(id);
@@ -259,7 +331,9 @@ public class TrafficLightSystem implements Runnable{
         
         
         Iterator<Integer> iterator2= l1.finishlist.iterator();
+
         while(iterator2.hasNext()){
+            System.out.println("T1 finished..");
             Integer id = iterator2.next();
             Pair<Character,Character> c=  ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
              
@@ -272,6 +346,7 @@ public class TrafficLightSystem implements Runnable{
         Iterator iterator3= l2.waitlist.iterator();
 
         while(iterator3.hasNext()){
+            System.out.println("T2 Waiting..");
             Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator3.next();
             int id = t.first;
            Pair<Character,Character> c= TrafficLightSystem.idDirMap.get(id);
@@ -285,7 +360,9 @@ public class TrafficLightSystem implements Runnable{
         
         
         Iterator<Integer>  iterator4= l2.finishlist.iterator();
+
         while(iterator4.hasNext()){
+            System.out.println("T2 finished..");
             Integer id = iterator4.next();
             Pair<Character,Character> c=  ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
              
@@ -297,7 +374,9 @@ public class TrafficLightSystem implements Runnable{
 
         Iterator iterator5= l3.waitlist.iterator();
 
+        
         while(iterator5.hasNext()){
+            System.out.println("T3 waiting..");
             Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator5.next();
             int id = t.first;
             Pair<Character,Character> c= ( Pair<Character,Character>) TrafficLightSystem.idDirMap.get(id);
@@ -309,9 +388,9 @@ public class TrafficLightSystem implements Runnable{
         } 
 
         
-        
         Iterator<Integer> iterator6= l3.finishlist.iterator();
         while(iterator6.hasNext()){
+            System.out.println("T3 finished..");
             Integer id = iterator6.next();            
             Pair<Character,Character> c= ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
             char inDir = c.first;
