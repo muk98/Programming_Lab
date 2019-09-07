@@ -1,9 +1,8 @@
 import java.util.*; 
 import java.util.concurrent.CyclicBarrier;
 import java.io.File;
-import java.util.Scanner; 
-import java.awt.event.*; 
-import javax.swing.*;
+import java.util.Scanner;
+import javax.swing.*; 
 
  class Pair<A, B> {
     public A first;
@@ -204,47 +203,37 @@ public class TrafficLightSystem implements Runnable{
     public static CyclicBarrier newBarrier = new CyclicBarrier(5);
     public static HashMap<Integer,List<Integer>> idTimeMap;
     public static HashMap<Integer,Pair<Character,Character>> idDirMap;    
-    public static Boolean inputBool;
-
+    
     public static void main(String[] args){
         File file = new File("input.txt");
-        // Scanner input=new Scanner(System.in);
-        // try {
-        //     input = new Scanner(file);
-        // } catch (Exception e) {
-        //     System.out.println(e);
-        // }
-        idTimeMap =new HashMap<>();
-        idDirMap=new HashMap<>();
-        inputBool=true;
-        takeInputFromUI();
-
-        while(inputBool){
-            System.out.println("");
-            continue;
+        Scanner input=new Scanner(System.in);
+        try {
+            input = new Scanner(file);
+        } catch (Exception e) {
+            System.out.println(e);
         }
-        System.out.println("input Done");
-
-
+        
+        
 
         Integer id=0;
-
+        idTimeMap =new HashMap<>();
+        idDirMap=new HashMap<>();
             
-        // while (input.hasNextLine()){
-        //     String[] line = input.nextLine().split("@",3);
-        //     Integer arrivalTime = Integer.parseInt(line[2]);
-        //     Character inDir = line[0].charAt(0);
-        //     Character outDir = line[1].charAt(0);
-        //     Pair<Character,Character>temp = new Pair(inDir,outDir);
-        //     idDirMap.put(id,temp);
+        while (input.hasNextLine()){
+            String[] line = input.nextLine().split("@",3);
+            Integer arrivalTime = Integer.parseInt(line[2]);
+            Character inDir = line[0].charAt(0);
+            Character outDir = line[1].charAt(0);
+            Pair<Character,Character>temp = new Pair(inDir,outDir);
+            idDirMap.put(id,temp);
 
-        //     if(idTimeMap.get(arrivalTime)==null){
-        //         List<Integer>tt =new LinkedList<>();
-        //         idTimeMap.put(arrivalTime,tt);
-        //     }
-        //     idTimeMap.get(arrivalTime).add(id++);
-        // }
-        // input.close();
+            if(idTimeMap.get(arrivalTime)==null){
+                List<Integer>tt =new LinkedList<>();
+                idTimeMap.put(arrivalTime,tt);
+            }
+            idTimeMap.get(arrivalTime).add(id++);
+        }
+        input.close();
         // System.out.println(idDirMap);
         // System.out.println(idTimeMap);
         
@@ -369,6 +358,7 @@ public class TrafficLightSystem implements Runnable{
         } 
 
         
+        
         Iterator<Integer>  iterator4= l2.finishlist.iterator();
 
         while(iterator4.hasNext()){
@@ -410,126 +400,6 @@ public class TrafficLightSystem implements Runnable{
 
     }
 
-
-  public static void takeInputFromUI(){
-        
-        InputFromUI uiInp = new InputFromUI();
-
-        uiInp.f = new JFrame("textfield"); 
-
-		// create a label to display text 
-		uiInp.l = new JLabel("Choose incoming direction"); 
-
-		// create a new button 
-        uiInp.N = new JButton("N"); 
-        uiInp.S = new JButton("S"); 
-        uiInp. E = new JButton("E"); 
-        uiInp.W = new JButton("W"); 
-        uiInp.submit=new JButton("Submit");
-        uiInp.done = new JButton("Done"); 
-        uiInp.add=new JButton("Add");
-		// create a object of the text class 
-		InputFromUI te = new InputFromUI(); 
-
-		// addActionListener to button 
-        uiInp.N.addActionListener(te);
-        uiInp.S.addActionListener(te);
-        uiInp.E.addActionListener(te);
-        uiInp.W.addActionListener(te); 
-        uiInp.done.addActionListener(te);
-        uiInp.submit.addActionListener(te);
-        uiInp.add.addActionListener(te);
-		// create a object of JTextField with 16 columns 
-		uiInp.t = new JTextField(16); 
-        JPanel p;
-		// create a panel to add buttons and textfield 
-	    p = new JPanel(); 
-       
-        p.add(uiInp.N);
-       p.add(uiInp.S);
-        p.add(uiInp.E);
-       p.add(uiInp.W);
-        p.add(uiInp.l);
-        p.add(uiInp.t);
-        p.add(uiInp.submit);
-        p.add(uiInp.add);
-        p.add(uiInp.done);
-		// add panel to frame 
-		uiInp.f.add(p); 
-
-		// set the size of frame 
-		uiInp.f.setSize(300, 300); 
-
-		uiInp.f.show(); 
-    }
 }
 
 
-class InputFromUI extends JFrame implements ActionListener { 
-	// JTextField 
-	static JTextField t; 
-
-	// JFrame 
-	static JFrame f; 
-
-	// JButton 
-	static JButton N; 
-    static JButton S;
-    static JButton E; 
-    static JButton W;
-    static JButton done;
-    static JButton add;
-    static JButton submit;
-	// label to diaplay text 
-	static JLabel l; 
-
-    Character inDir;
-    Character outDir;
-    Integer arrivaTime;
-    Integer id;
-    InputFromUI(){
-        id=0;
-    }
-
-    public void actionPerformed(ActionEvent e) 
-	{      
-        String s = e.getActionCommand(); 
-        if(l.getText()=="Choose incoming direction")
-        {
-           inDir=s.charAt(0); 
-            l.setText("Choose outgoing direction");
-        }
-        else if(l.getText()=="Choose outgoing direction")
-        {
-            outDir=s.charAt(0);
-            l.setText("Enter start time");
-        }
-        else if(l.getText()=="Enter start time")
-        {
-            Integer arrivalTime=Integer.parseInt(t.getText());
-            Character inDir = this.inDir;
-            Character outDir = this.outDir;
-            Pair<Character,Character>temp = new Pair(inDir,outDir);
-            TrafficLightSystem.idDirMap.put(id,temp);
-            if(TrafficLightSystem.idTimeMap.get(arrivalTime)==null){
-                List<Integer>tt =new LinkedList<>();
-                TrafficLightSystem.idTimeMap.put(arrivalTime,tt);
-            }
-            TrafficLightSystem.idTimeMap.get(arrivalTime).add(id++);
-            l.setText("Done or Wanna Add?"); 	
-        } 
-        else
-        {
-              if(s.charAt(0)=='A')
-              l.setText("Choose incoming direction");
-              else if(s.charAt(0)=='D')
-              {
-                TrafficLightSystem.inputBool=false;
-                // // this.f.close();
-                setVisible(false);
-                dispose();
-              }
-              
-        }
-    }
-}
