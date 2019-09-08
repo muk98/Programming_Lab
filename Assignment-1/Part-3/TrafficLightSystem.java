@@ -1,238 +1,11 @@
+package com;
+
 import java.util.*; 
 import java.util.concurrent.CyclicBarrier;
 import java.io.File;
 import java.util.Scanner; 
 import java.awt.event.*; 
 import javax.swing.*;
-
- class Pair<A, B> {
-    public A first;
-    public B second;
-
-     Pair(A first, B second) {
-        
-        this.first = first;
-        this.second = second;
-    }
- }
- 
-    
-class TrafficLight implements Runnable{
-    int id;
-    LinkedList<Pair<Integer,Integer>>  waitlist;
-    LinkedList<Integer> finishlist;
-    boolean empty;
-    int extra;
-    TrafficLight(int id)
-    {
-        
-        this.id=id;
-        waitlist = new  LinkedList<>(); 
-        
-        finishlist=new LinkedList<>();
-        empty=false;
-        extra=0;
-    }
-
-    void emptyWait(Integer time,Integer carId)
-    {
-        Integer tid=((time)/60)%3;
-        tid++;
-        System.out.println(Integer.toString(carId));
-        if(id==tid && waitlist.isEmpty())
-        {
-            
-            Integer ans=0;
-            if(empty)
-            {
-                ans+=6;
-            }
-            if((ans+time)%60>54)
-            {
-                ans+=120+60-time%60;
-                Pair<Integer,Integer> t =new Pair(carId,ans);
-                waitlist.add(t); 
-            }
-            else if(ans==0){
-                empty=true;
-                if(extra>0)
-                {
-                    Pair<Integer,Integer> t =new Pair(carId,extra);
-                    waitlist.add(t);
-                }
-                else
-                {
-                    finishlist.add(carId);
-                    extra=6;
-                }
-            } 
-            else
-            {
-                Pair<Integer,Integer> t =new Pair(carId,ans);
-                waitlist.add(t); 
-            }       
-        }
-        else if(waitlist.isEmpty())
-        {
-            Integer ans = 60*((time)/60)+60*((id-tid+3)%3)-time;
-            Pair<Integer,Integer> t =new Pair(carId,ans);
-            waitlist.add(t); 
-        }
-        else 
-        {
-            Integer ans = waitlist.getLast().second+6;
-            if((time+ans)%60>54)
-            {
-                ans+=120+60-(time+ans)%60;
-                Pair<Integer,Integer> t =new Pair(carId,ans);
-                waitlist.add(t); 
-            }
-            else
-            {
-                Pair<Integer,Integer> t =new Pair(carId,ans);
-                waitlist.add(t);
-            }
-        }
-    }
-
-    void updateList(){
-        if(!waitlist.isEmpty())
-        {
-            Iterator<Pair<Integer,Integer>> iterator=waitlist.iterator();
-            while(iterator.hasNext())
-            {
-                Pair<Integer,Integer> t = iterator.next();
-                t.second--;
-                if(t.second<=0)
-                {
-                    finishlist.add(t.first);
-                    try{
-                        iterator.remove();
-                    }
-                    catch(Exception e){
-                        e.printStackTrace();
-                        System.out.println("god save usssss");
-                    }
-                    empty=true;
-                    extra=6;
-                }
-            }
-        }
-    }
-
-    public void run(){
-        while(true){
-        Integer time = TrafficLightSystem.time;
-        updateList();
-        if(TrafficLightSystem.idTimeMap.containsKey(time))
-        {
-          
-            Iterator<Integer> iterator = TrafficLightSystem.idTimeMap.get(time).iterator();
-            while(iterator.hasNext()) {
-                Integer id = iterator.next();
-                // System.out.println(id);
-                Pair<Character,Character> car = TrafficLightSystem.idDirMap.get(id);
-                if(this.id==1 && car.first=='S' && car.second=='E')
-                {
-                    emptyWait(time,id);
-                }
-                else if(this.id==2 && car.first=='W' && car.second=='S')
-                {
-                    emptyWait(time,id);
-                }
-                else if(this.id==3 && car.first=='E' && car.second=='W')
-                {
-                    emptyWait(time,id);
-                }
-            }   
-        }
-        empty=false;
-       if(extra>0)extra--;
-        try
-        {
-            TrafficLightSystem.newBarrier.await();
-        }
-        catch(Exception e)
-        {
-
-        }
-        try
-        { 
-            Thread.sleep(50);
-        }  
-        catch (Exception e)  
-        { 
-            
-        }         
-    }
-    }
-}
-
-class UnrestrictedDir implements Runnable{
-    LinkedList<Integer>finishlist;
-
-    UnrestrictedDir()
-    {
-        finishlist=new LinkedList<>();
-    }
-
-    public void run()
-    {
-        while(true){
-        int time = TrafficLightSystem.time;
-        if(TrafficLightSystem.idTimeMap.containsKey(time))
-        {
-            
-            Iterator<Integer> iterator = TrafficLightSystem.idTimeMap.get(time).iterator();
-            while(iterator.hasNext()) {
-                Integer carId=iterator.next();
-                Pair<Character,Character>  car = TrafficLightSystem.idDirMap.get(carId);
-                if(car.first=='S' && car.second=='W')
-                {
-                   finishlist.add(carId);
-                }
-                else if(car.first=='E'&&car.second=='S')
-                {
-                    finishlist.add(carId);
-                }
-                else if(car.first=='W'&&car.second=='E')
-                {
-                    finishlist.add(carId);
-                }
-            }   
-        }
-        try
-        {
-            TrafficLightSystem.newBarrier.await();
-        }
-        catch(Exception e)
-        {
-
-        }
-        try
-            { 
-                Thread.sleep(20);
-            }  
-            catch (Exception e)  
-            { 
-                
-            } 
-        }
-    }   
-}   
-
-
-class InputFormat{
-    char inDir;
-    char outDir;
-    Integer time;
-
-    InputFormat(char inDir,char outDir,Integer time){
-        this.inDir = inDir;
-        this.outDir = outDir;
-        this.time = time;
-    }
-}
 
 
 public class TrafficLightSystem implements Runnable{
@@ -249,12 +22,6 @@ public class TrafficLightSystem implements Runnable{
     public static JLabel l;
     public static void main(String[] args){
         File file = new File("input.txt");
-        // Scanner input=new Scanner(System.in);
-        // try {
-        //     input = new Scanner(file);
-        // } catch (Exception e) {
-        //     System.out.println(e);
-        // }
         idTimeMap =new HashMap<>();
         idDirMap=new HashMap<>();
         inputBool=true;
@@ -271,25 +38,6 @@ public class TrafficLightSystem implements Runnable{
         printOutputUI(out,l);
 
         Integer id=0;
-
-    
-        // while (input.hasNextLine()){
-        //     String[] line = input.nextLine().split("@",3);
-        //     Integer arrivalTime = Integer.parseInt(line[2]);
-        //     Character inDir = line[0].charAt(0);
-        //     Character outDir = line[1].charAt(0);
-        //     Pair<Character,Character>temp = new Pair(inDir,outDir);
-        //     idDirMap.put(id,temp);
-
-        //     if(idTimeMap.get(arrivalTime)==null){
-        //         List<Integer>tt =new LinkedList<>();
-        //         idTimeMap.put(arrivalTime,tt);
-        //     }
-        //     idTimeMap.get(arrivalTime).add(id++);
-        // }
-        // input.close();
-        // System.out.println(idDirMap);
-        // System.out.println(idTimeMap);
         
         TrafficLightSystem controller = new TrafficLightSystem();
        
@@ -304,7 +52,6 @@ public class TrafficLightSystem implements Runnable{
          l2 = new TrafficLight(2);
          l3 = new TrafficLight(3);
          d=new UnrestrictedDir();
-        
 
         
         Thread t1 = new Thread(l1);
@@ -324,7 +71,7 @@ public class TrafficLightSystem implements Runnable{
             }  
             catch (Exception e)  
             { 
-                
+                e.printStackTrace();
             }
 
             try
@@ -333,7 +80,7 @@ public class TrafficLightSystem implements Runnable{
             }  
             catch (Exception e)  
             { 
-            
+                e.printStackTrace();
             } 
             
             // System.out.println(time);
@@ -444,8 +191,6 @@ public class TrafficLightSystem implements Runnable{
             System.out.println(Integer.toString(id)+" "+Integer.toString(waitTime)+" "+inDir+" "+outDir);
         } 
 
-        
-        
         Iterator<Integer> iterator2= l1.finishlist.iterator();
 
         while(iterator2.hasNext()){
@@ -531,9 +276,7 @@ public class TrafficLightSystem implements Runnable{
             {
                 ans+="Wait\n";
                     
-            }
-          
-                      
+            }          
         }
         return ans;
     }
@@ -590,7 +333,6 @@ public class TrafficLightSystem implements Runnable{
 		uiInp.f.show(); 
     }
 
-
     public static void printStatus(){
         PrintUI ui = new PrintUI();
         
@@ -615,7 +357,6 @@ public class TrafficLightSystem implements Runnable{
 
     }
     
-
     public static void printOutputUI(JButton showOutput,JLabel l){
         PrintOutputUI outUI = new PrintOutputUI();
         
@@ -639,170 +380,4 @@ public class TrafficLightSystem implements Runnable{
 }
 
 
-class PrintOutputUI extends JFrame implements ActionListener{
-
-    static JFrame f; 
-    static JButton showStatus;
-    static JButton showOutput;
-    static JLabel l1;
-
-    PrintOutputUI(){
-        
-    }
-
-    public void actionPerformed(ActionEvent e){
-        String s = e.getActionCommand();
-        if(s.equals("Show Output")){
-            String ans = "<html>Time: "+Integer.toString(TrafficLightSystem.time)+"</br>"+TrafficLightSystem.waitorpass().replaceAll(">", "&gt;").replaceAll("\n", "<br/>")+"</html>";
-            l1.setText(ans);
-        }
-        if(s.equals("Print Status")){
-            TrafficLightSystem.printStatus();
-        }
-
-    }
-
-
-}
-
-
-
-class InputFromUI extends JFrame implements ActionListener { 
-	// JTextField 
-	static JTextField t; 
-
-	// JFrame 
-	static JFrame f; 
-
-	// JButton 
-	static JButton N; 
-    static JButton S;
-    static JButton E; 
-    static JButton W;
-    static JButton done;
-    static JButton add;
-    static JButton submit;
-	// label to display text 
-	static JLabel l; 
-
-    Character inDir;
-    Character outDir;
-    Integer arrivaTime;
-    Integer id;
-    InputFromUI(){
-        id=0;
-    }
-
-    public void actionPerformed(ActionEvent e) 
-	{      
-        String s = e.getActionCommand(); 
-        if((l.getText()=="Choose incoming direction")||(l.getText()=="Please select incoming direction!!!!"))
-        {
-           inDir=s.charAt(0); 
-           if(inDir=='D'||inDir=='s'||inDir=='A')
-           {
-               l.setText("Please select incoming direction!!!!");
-           }
-           else
-            l.setText("Choose outgoing direction");
-        }
-        else if((l.getText()=="Choose outgoing direction")||(l.getText()=="Please select outgoing direction!!!!"))
-        {
-            outDir=s.charAt(0);
-            if(outDir=='D'||outDir=='s'||outDir=='A')
-            {
-                l.setText("Please select outgoing direction!!!!");
-            }
-            else
-            l.setText("Enter start time");
-        }
-        else if((l.getText()=="Enter start time")||(l.getText()=="Please Specify time and click Enter"))
-        {
-            if(s.charAt(0)!='s')
-            {
-                l.setText("Please Specify time and click Enter");
-            }
-            else{
-                Integer arrivalTime=Integer.parseInt(t.getText());
-                Character inDir = this.inDir;
-                Character outDir = this.outDir;
-                Pair<Character,Character>temp = new Pair(inDir,outDir);
-                TrafficLightSystem.idDirMap.put(id,temp);
-                if(TrafficLightSystem.idTimeMap.get(arrivalTime)==null){
-                    List<Integer>tt =new LinkedList<>();
-                    TrafficLightSystem.idTimeMap.put(arrivalTime,tt);
-                }
-                TrafficLightSystem.idTimeMap.get(arrivalTime).add(id++);
-                l.setText("Done or Wanna Add?");
-            } 	
-        } 
-        else
-        {
-            if(s.charAt(0)=='A')
-                l.setText("Choose incoming direction");
-            else if(s.charAt(0)=='D')
-            {
-                TrafficLightSystem.inputBool=false;
-                f.dispose();
-            }
-            else
-            {
-                l.setText("Please choose Add or Done!!");
-            }
-        }
-    }
-}
-
-
-class PrintUI extends JFrame implements ActionListener{
-    static JFrame f; 
-    static JTextField t;
-    static JButton showStatus;
-    static JButton endStatus;
-    static JLabel l1;
-
-    PrintUI(){
-        
-    }
-
-    public void actionPerformed(ActionEvent e){
-        String s = e.getActionCommand();
-        if(s.equals("Print Status")){
-            Integer time = TrafficLightSystem.time;
-            int tid=((time)/60)%3;
-            tid++;
-            int remTime = 60-time%60;
-            String ans="";
-            ans=ans+("<html>|   Traffic Light   |   Status    |   Time    |<br/>");
-            if(tid==1){
-                ans=ans+("|        T1         |    Green    |   " + Integer.toString(remTime) +"  |<br/>");
-            }
-            else{
-                ans=ans+("|        T1         |    Red      |    --     |<br/>");
-            }
-            
-            if(tid==2){
-                ans=ans+("|        T2         |    Green    |" + Integer.toString(remTime) +"  |<br/>");
-            }
-            else{
-                ans+=("|        T2         |    Red      |    --     |<br/>");
-            }
-            if(tid==3){
-                ans+=("|        T3         |    Green    |" + Integer.toString(remTime) +"  |<br/>");
-            }
-            else{
-                ans+=("|        T3         |    Red      |    --     |<br/>" );
-            } 
-            ans+=(TrafficLightSystem.getAns(1).replaceAll(">", "&gt;").replaceAll("\n", "<br/>"));
-            ans+=(TrafficLightSystem.getAns(2).replaceAll(">", "&gt;").replaceAll("\n", "<br/>") );
-           ans+=(TrafficLightSystem.getAns(3).replaceAll(">", "&gt;").replaceAll("\n", "<br/>"));
-           ans+=(TrafficLightSystem.get().replaceAll(">", "&gt;").replaceAll("\n", "<br/>") + "</html>");
-            l1.setText(ans);
-        }
-        else 
-        {
-            f.dispose();
-        }
-    }
-}
 
