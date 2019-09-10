@@ -4,7 +4,6 @@
 *          the working of the Three traffic lights and provides the necessary input to each of them at each second
 */ 
 package com;
-
 import java.util.*; 
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Semaphore;
@@ -49,6 +48,8 @@ public class TrafficLightSystem implements Runnable{
         idDirMap=new HashMap<>();
         PreviousStatus="";
         l=new JLabel("");
+
+        /*sempahore lock instance for each traffic light and other synchronization*/
         sem1=new Semaphore(1);
         sem2=new Semaphore(1);
         sem3=new Semaphore(1);
@@ -62,8 +63,9 @@ public class TrafficLightSystem implements Runnable{
             System.out.print("");
             continue;
         }
-        /* Output frame is called to display the time */
-        printOutputUI(l);
+
+        /* Output frame is called to display the time and status of input cars*/
+        printOutput(l);
         
         /* Thread instance of TrafficLightSystem class is created and it starts running */
         TrafficLightSystem controller = new TrafficLightSystem();
@@ -73,19 +75,20 @@ public class TrafficLightSystem implements Runnable{
 
     public void run(){
         
-        /*All TrafficLights and UnrestrictedDir are initialised with appropriate semaphores */
-         l1 = new TrafficLight(1,sem1);
-         l2 = new TrafficLight(2,sem2);
-         l3 = new TrafficLight(3,sem3);
-         d=new UnrestrictedDir(semu);
+        /*Create Traffic Lights instance with their respective semaphores*/
+        l1 = new TrafficLight(1,sem1);
+        l2 = new TrafficLight(2,sem2);
+        l3 = new TrafficLight(3,sem3);
+        d=new UnrestrictedDir(semu);
 
         
-        /*Thread instances are created and threads start running */
+        /*Thread instances are created*/
         Thread t1 = new Thread(l1);
         Thread t2 = new Thread(l2);
         Thread t3 = new Thread(l3);
         Thread t4 = new Thread(d);
 
+        /*Start the threads*/
         t1.start();
         t2.start();
         t3.start();
@@ -102,7 +105,7 @@ public class TrafficLightSystem implements Runnable{
                 e.printStackTrace();
             }
 
-            /*Will make the thread wait for all other threads to compete their work */
+            /*Call the await method to wait for other threads to join at the barrier*/
             try
             { 
                 TrafficLightSystem.newBarrier.await();
@@ -120,10 +123,10 @@ public class TrafficLightSystem implements Runnable{
                 PreviousStatus = status;
             }
             
-            /*Changing the string to html tag to set it in the label */
+            /*Change the label of the Status*/
             String ans = "<html>Time: "+Integer.toString(TrafficLightSystem.time)+" </br>"+PreviousStatus.replaceAll(">", "&gt;").replaceAll("\n", "<br/>")+"</html>";
             
-            /* Semaphore is acquired for time. As we dont want time to change before we display the data */
+            /* Semaphore is acquired for time. As we dont want time to change before we display the data*/
             try{
                 semt.acquire();
             }
@@ -131,19 +134,26 @@ public class TrafficLightSystem implements Runnable{
                 e.printStackTrace();
             }
 
-            /* The time and status is diplayed */
+            /* The time and status is diplayed*/
             l.setText(ans);
             time++;
             semt.release();
-            
             }
         }
     
-    /* */
+        /*This functions returns the cars status from each traffic light and returns it as a String in the
+        * form of html to show on the output status.
+        *  Parameters: id1 -> shows from which traffic light we need to get the data.
+        */
         public static String getDataFromTrafficLight(int id1)
         {
             Iterator iterator1;
             Iterator<Integer>  iterator2;
+
+            /*Get the iterator of the data structures that hold the data in the particular traffic Light
+            * Aquire the lock as when accessing the list that traffic light thread might change the 
+            * the list.
+            */
             if(id1==1)
             {
                 iterator1= l1.waitlist.iterator();
@@ -180,36 +190,55 @@ public class TrafficLightSystem implements Runnable{
             
             String ans="";
 
+            /*Iterate over waiting list*/
             while(iterator1.hasNext()){
+
+                /*Get the id of the car*/
                 Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator1.next();
                 int id = t.first;
-                Pair<Character,Character> c= ( Pair<Character,Character>) TrafficLightSystem.idDirMap.get(id);
+
+                /*Get the waiting time and directions of that car*/
+                Pair<Character,Character> c =( Pair<Character,Character>) TrafficLightSystem.idDirMap.get(id);
                 int waitTime = t.second;
                 char inDir = c.first;
                 char outDir = c.second;
+
+                /*Store the data in a string in html format*/
                 ans+="<tr><th>"+ Integer.toString(id)+"</th><th>" +inDir+ "</th><th>" + outDir +"</th><th>Waiting</th><th>" +  Integer.toString(waitTime)+ "</th></tr>";
             } 
-            // ans+="Finished T"+Integer.toString(id1)+"\n";
 
+            /*Iterate over List that stores the cars that are already passed*/
             while(iterator2.hasNext()){
+
+                /*Get the id of the car*/
                 Integer id = iterator2.next();
-                Pair<Character,Character> c=  ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
+
+                 /*Get the directions of that car*/
+                Pair<Character,Character> c =  ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
                 char inDir = c.first;
                 char outDir = c.second;
-               ans+= "<tr><th>"+ Integer.toString(id)+ "</th><th>" + inDir+ "</th><th>" + outDir +"</th><th>Passed</th><th>---</th></tr>";
+
+                /*Store the data in a string in html format*/
+                ans+= "<tr><th>"+ Integer.toString(id)+ "</th><th>" + inDir+ "</th><th>" + outDir +"</th><th>Passed</th><th>---</th></tr>";
             }  
+
+            /*Release the Locks*/
             if(id1==1)sem1.release();
             else if(id1==2)sem2.release();
             else sem3.release();
+
             return ans; 
         }
         
-        public static String getDatafromUD()
-        {
 
+        /*This function returns the data of the cars that were passed unrestricted*/
+        public static String getDatafromUD(){
 
+            /*Get the iterator of the data structures that hold the data.Aquire the lock as 
+            * when accessing the list the thread might change the 
+            * the list.
+            */
             Iterator<Integer> iterator2= d.finishlist.iterator();
-            
             String ans="";
             try{
                 semu.acquire();
@@ -217,132 +246,46 @@ public class TrafficLightSystem implements Runnable{
             catch(Exception e){
                 e.printStackTrace();
             }
+
+            /*Iterate over the list*/
             while(iterator2.hasNext()){
+
+                /*Get the id of the car*/
                 Integer id = iterator2.next();
+
+                /*Get the directions of that car*/
                 Pair<Character,Character> c=  (Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
                 char inDir = c.first;
                 char outDir = c.second;
+
+                 /*Store the data in a string in html format*/
                 ans+= "<tr><th>" + Integer.toString(id)+"</th><th>"+inDir+"</th><th>"+outDir+"</th><th>Passed</th><th>---</th></tr>";
             }
+
+            /*Release the lock*/
             semu.release();
             System.out.println(ans);
             return ans; 
         }
 
-     public void printDetails(TrafficLight l1,TrafficLight l2,TrafficLight l3,UnrestrictedDir d){
-        int tid=((time)/60)%3;
-        tid++;
-        int remTime = 60-time%60;
-        System.out.println("|   Traffic Light   |   Status    |   Time    |");
-        if(tid==1){
-            System.out.println("|        T1         |    Green    |   " + Integer.toString(remTime) +"  |");
-        }
-        else{
-            System.out.println("|        T1         |    Red      |    --     |");
-        }
-        
-        if(tid==2){
-            System.out.println("|        T2         |    Green    |" + Integer.toString(remTime) +"  |");
-        }
-        else{
-            System.out.println("|        T2         |    Red      |    --     |");
-        }
-        if(tid==3){
-            System.out.println("|        T3         |    Green    |" + Integer.toString(remTime) +"  |");
-        }
-        else{
-            System.out.println("|        T3         |    Red      |    --     |" );
-        }
-        
-        Iterator iterator1= l1.waitlist.iterator();
-        
-        while(iterator1.hasNext()){
-            System.out.println("T1 Waiting..");
-            Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator1.next();
-            int id = t.first;
-            Pair<Character,Character> c= ( Pair<Character,Character>) TrafficLightSystem.idDirMap.get(id);
-            int waitTime = t.second;
-            char inDir = c.first;
-            char outDir = c.second;
-            System.out.println(Integer.toString(id)+" "+Integer.toString(waitTime)+" "+inDir+" "+outDir);
-        } 
-
-        Iterator<Integer> iterator2= l1.finishlist.iterator();
-
-        while(iterator2.hasNext()){
-            System.out.println("T1 finished..");
-            Integer id = iterator2.next();
-            Pair<Character,Character> c=  ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
-             
-             
-             char inDir = c.first;
-             char outDir = c.second;
-            System.out.println(Integer.toString(id)+" "+inDir+" "+outDir);
-        }
-
-        Iterator iterator3= l2.waitlist.iterator();
-
-        while(iterator3.hasNext()){
-            System.out.println("T2 Waiting..");
-            Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator3.next();
-            int id = t.first;
-           Pair<Character,Character> c= TrafficLightSystem.idDirMap.get(id);
-            
-            int waitTime = t.second;
-            char inDir = c.first;
-            char outDir = c.second;
-            System.out.println(Integer.toString(id)+" "+Integer.toString(waitTime)+" "+inDir+" "+outDir);
-        } 
-
-        
-        Iterator<Integer>  iterator4= l2.finishlist.iterator();
-
-        while(iterator4.hasNext()){
-            System.out.println("T2 finished..");
-            Integer id = iterator4.next();
-            Pair<Character,Character> c=  ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
-             
-             
-             char inDir = c.first;
-             char outDir = c.second;
-            System.out.println(Integer.toString(id)+" "+inDir+" "+outDir);
-        }
-
-        Iterator iterator5= l3.waitlist.iterator();
-
-        
-        while(iterator5.hasNext()){
-            System.out.println("T3 waiting..");
-            Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator5.next();
-            int id = t.first;
-            Pair<Character,Character> c= ( Pair<Character,Character>) TrafficLightSystem.idDirMap.get(id);
-
-            int waitTime = t.second;
-            char inDir = c.first;
-            char outDir = c.second;
-            System.out.println(Integer.toString(id)+" "+Integer.toString(waitTime)+" "+inDir+" "+outDir);
-        } 
-
-        
-        Iterator<Integer> iterator6= l3.finishlist.iterator();
-        while(iterator6.hasNext()){
-            System.out.println("T3 finished..");
-            Integer id = iterator6.next();            
-            Pair<Character,Character> c= ( Pair<Character,Character>)  TrafficLightSystem.idDirMap.get(id);
-            char inDir = c.first;
-            char outDir = c.second;
-            System.out.println(Integer.toString(id)+" "+inDir+" "+outDir);
-        }
-    }
-
+    /**
+     * This function returns the status of the car that have just arrived at the T-junction. 
+     * @return status of the arrived car in html format.
+     */
     public static String  waitorpass()
     {
         
         String ans="";
+        /**
+         * If no car arrived at that time then return null.
+         */
         if(!idTimeMap.containsKey(time))
             return ans;
+
+        /**get the list of the cars that has arrived at that time*/    
         Iterator<Integer> it=idTimeMap.get(time).iterator();
         
+        /**Lock all the traffic light data as they might change the data while we are accessing here*/
         try{
             sem1.acquire();
             sem2.acquire();
@@ -352,19 +295,23 @@ public class TrafficLightSystem implements Runnable{
         catch(Exception e){
             e.printStackTrace();
         }
-        
+
+        /**Check in which list that car was pushed to return the proper status.*/
         while(it.hasNext())
         {
             int id=it.next();
+            
+            /**If any of the traffic light contains the car id in its finish list then status of car is passed
+             * else waiting.
+            */
             ans+="Vehicle: "+Integer.toString(id)+" ";
             if(l1.finishlist.contains(id) || l2.finishlist.contains(id)||l3.finishlist.contains(id)||d.finishlist.contains(id))
                 ans+="Pass\n";
-            else
-            {
-                ans+="Wait\n";
-                    
+            else{
+                ans+="Wait\n";       
             }          
         }
+        /**Release the locks*/
         sem1.release();
         sem2.release();
         sem3.release();
@@ -373,103 +320,148 @@ public class TrafficLightSystem implements Runnable{
         return ans;
     }
 
+    /**
+     * This function creates a frame to take input from the UI.
+     */
     public static void takeInputFromUI(){
         
-        InputFromUI uiInp = new InputFromUI();
-        InputFromUI te = new InputFromUI(); 
-        uiInp.frame = new JFrame("textfield"); 
-        uiInp.frame.setBounds(100, 100, 500, 350);
-        uiInp.frame.setResizable(false);
-		uiInp.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		uiInp.frame.getContentPane().setLayout(null);
+        /*Create an instance of input class*/
+        InputFromUI inpUI = new InputFromUI();
+
+        /**Create an action listener for the class*/
+        InputFromUI uiActionListen = new InputFromUI();
+        
+        /**Initialize the frame and set the required fields*/
+        inpUI.frame = new JFrame("textfield"); 
+        inpUI.frame.setBounds(100, 100, 500, 350);
+        inpUI.frame.setResizable(false);
+		inpUI.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		inpUI.frame.getContentPane().setLayout(null);
     
-        uiInp.inDirLabel = new JLabel("Incoming Direction(S/W/E)");
-		uiInp.inDirLabel.setBounds(65, 31, 200, 20);
-		uiInp.frame.getContentPane().add(uiInp.inDirLabel);
-		uiInp.inDirText = new JTextField();
-		uiInp.inDirText.setBounds(270, 28, 86, 25);
-		uiInp.frame.getContentPane().add(uiInp.inDirText);
-        uiInp.inDirText.setColumns(10);
-        uiInp.outDirLabel = new JLabel("Outgoing Direction(S/W/E)");
-		uiInp.outDirLabel.setBounds(65, 75, 200, 20);
-		uiInp.frame.getContentPane().add(uiInp.outDirLabel);
+        /**Set the labels,text boxes to take input and other required fields*/
+        inpUI.inDirLabel = new JLabel("Incoming Direction(S/W/E)");
+		inpUI.inDirLabel.setBounds(65, 31, 200, 20);
+		inpUI.frame.getContentPane().add(inpUI.inDirLabel);
+		inpUI.inDirText = new JTextField();
+		inpUI.inDirText.setBounds(270, 28, 86, 25);
+		inpUI.frame.getContentPane().add(inpUI.inDirText);
+        inpUI.inDirText.setColumns(10);
+        inpUI.outDirLabel = new JLabel("Outgoing Direction(S/W/E)");
+		inpUI.outDirLabel.setBounds(65, 75, 200, 20);
+		inpUI.frame.getContentPane().add(inpUI.outDirLabel);
+		inpUI.outDirText = new JTextField();
+		inpUI.outDirText.setBounds(270, 75,86, 25);
+		inpUI.frame.getContentPane().add(inpUI.outDirText);
+        inpUI.outDirText.setColumns(10);
+
+
+        inpUI.timeLabel = new JLabel("Time(in integer as seconds)");
+		inpUI.timeLabel.setBounds(65, 120, 200, 20);
+		inpUI.frame.getContentPane().add(inpUI.timeLabel);
 		
-		uiInp.outDirText = new JTextField();
-		uiInp.outDirText.setBounds(270, 75,86, 25);
-		uiInp.frame.getContentPane().add(uiInp.outDirText);
-        uiInp.outDirText.setColumns(10);
+		inpUI.incomingTimeText = new JTextField();
+		inpUI.incomingTimeText.setBounds(270, 120,86, 25);
+		inpUI.frame.getContentPane().add(inpUI.incomingTimeText);
+        inpUI.incomingTimeText.setColumns(10);
 
+        /**Label to show status whether given input is accepted or not*/
+        inpUI.infoLabel = new JLabel("");
+		inpUI.infoLabel.setBounds(65, 150, 500, 20);
+		inpUI.frame.getContentPane().add(inpUI.infoLabel);
 
-        uiInp.timeLabel = new JLabel("Time(in integer as seconds)");
-		uiInp.timeLabel.setBounds(65, 120, 200, 20);
-		uiInp.frame.getContentPane().add(uiInp.timeLabel);
-		
-		uiInp.incomingTimeText = new JTextField();
-		uiInp.incomingTimeText.setBounds(270, 120,86, 25);
-		uiInp.frame.getContentPane().add(uiInp.incomingTimeText);
-        uiInp.incomingTimeText.setColumns(10);
+        /**Create the buttons to add the input and to tell the system that input is completed*/
+        inpUI.add = new JButton("Add");
+		inpUI.add.setBounds(65, 170, 100, 23);
+        inpUI.frame.getContentPane().add(inpUI.add);
+        inpUI.done = new JButton("Done");
+        inpUI.done.setBounds(200, 170, 100, 23);
+        inpUI.frame.getContentPane().add(inpUI.done);
 
-        uiInp.infoLabel = new JLabel("");
-		uiInp.infoLabel.setBounds(65, 150, 500, 20);
-		uiInp.frame.getContentPane().add(uiInp.infoLabel);
+        /**Add the action listener with the ui*/
+        inpUI.done.addActionListener(uiActionListen);
+        inpUI.add.addActionListener(uiActionListen);
 
-        uiInp.add = new JButton("Add");
-		
-		uiInp.add.setBounds(65, 170, 100, 23);
-        uiInp.frame.getContentPane().add(uiInp.add);
-        uiInp.done = new JButton("Done");
-        uiInp.done.setBounds(200, 170, 100, 23);
-        uiInp.frame.getContentPane().add(uiInp.done);
-
-        uiInp.done.addActionListener(te);
-        uiInp.add.addActionListener(te);
-		uiInp.frame.show();
+        /**show the frame on the screen*/
+		inpUI.frame.show();
 
     }
 
+    /**
+     * This function create the window that shows the status all the cars that 
+     * has entered into the system on the UI.
+     * @return Frame on which Data is rendered.
+     */
     public static JFrame printStatus(){
-        PrintUI ui = new PrintUI();
         
-        ui.f = new JFrame("Waiting Status");
+        /**Create an ui to render the status*/
+        PrintStatusUI ui = new PrintStatusUI();
+
+        /**Assign a new frame*/
+        ui.frame = new JFrame("Waiting Status");
         
-        ui.l1 = new JLabel("");
+        ui.label = new JLabel("");
         
+        /**Add button to close and refresh the window*/
         ui.showStatus = new JButton("Refresh Window");
         ui.endStatus = new JButton("Close Window");
         
-        PrintUI actUI = new PrintUI();
+        /**Create an action listener*/
+        PrintStatusUI actUI = new PrintStatusUI();
         
+        /**Add the buttons to the action listener */
         ui.showStatus.addActionListener(actUI);
         ui.endStatus.addActionListener(actUI);
-        JPanel p = new JPanel();
-        p.add(ui.l1);
-        p.add(ui.endStatus);
-        p.add(ui.showStatus);
-        ui.f.add(p); 
-        ui.f.setSize(500, 500);
+
+        /**Create a panel over which data is rendered*/
+        JPanel panel = new JPanel();
+
+        /**Add the components to the panel*/
+        panel.add(ui.label);
+        panel.add(ui.endStatus);
+        panel.add(ui.showStatus);
+
+        /**Add the panel to the frame*/
+        ui.frame.add(panel); 
+        ui.frame.setSize(500, 500);
         
-        ui.f.show();
+        /**show the frame on the screen*/
+        ui.frame.show();
+
+        /**Render the intial data*/
         ui.showStatus.doClick();
-        return ui.f;
+
+        return ui.frame;
     }
     
-    public static void printOutputUI(JLabel l){
-        System.out.println("oolalaa");
-        PrintOutputUI outUI = new PrintOutputUI();
+    /**
+     * Print the output screen on the screen
+     * @param label label to print on the output screen
+     */
+    public static void printOutput(JLabel label){
+
+        /**Create an instance of output window*/
+        OutputScreen outUI = new OutputScreen();
         
-        outUI.f = new JFrame("Output UI"); 
-        outUI.l1 = l;
+        /**Create a new frame*/
+        outUI.frame = new JFrame("Output UI"); 
+        outUI.label = label;
         outUI.showStatus = new JButton("Print Status");
 
-        PrintOutputUI actoutUI = new PrintOutputUI();
+        /**Create actionListener for the ui*/
+        OutputScreen actoutUI = new OutputScreen();
+
+        /**Add the required fields on the actions listener*/
         outUI.showStatus.addActionListener(actoutUI);
 
-        JPanel p = new JPanel();
-        p.add(outUI.l1);
-        p.add(outUI.showStatus);
-        outUI.f.add(p); 
-        outUI.f.setSize(500, 500);
-        outUI.f.show();
+        /**Create a new panel to render the data on it*/
+        JPanel panel = new JPanel();
+        panel.add(outUI.label);
+        panel.add(outUI.showStatus);
+        outUI.frame.add(panel); 
+        outUI.frame.setSize(500, 500);
+
+         /**show the frame on the screen*/
+        outUI.frame.show();
     }
 }
 
