@@ -1,5 +1,5 @@
 package com;
-
+import java.util.concurrent.Semaphore;
 import java.util.*;
 import com.Pair;
 import com.*;
@@ -10,8 +10,8 @@ class TrafficLight implements Runnable{
     LinkedList<Integer> finishlist;
     boolean empty;
     int extra;
-    
-    TrafficLight(int id)
+    Semaphore sem;
+    TrafficLight(int id,Semaphore sem)
     {
         this.id=id;
         waitlist = new  LinkedList<>(); 
@@ -19,13 +19,21 @@ class TrafficLight implements Runnable{
         finishlist=new LinkedList<>();
         empty=false;
         extra=0;
+        this.sem=sem;
     }
 
     void emptyWait(Integer time,Integer carId)
-    {
+    {   
+        // int time = TrafficLightSystem.time;System.out.println(time);
         Integer tid=((time)/60)%3;
         tid++;
         System.out.println(Integer.toString(carId));
+        try{
+            sem.acquire();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
         if(id==tid && waitlist.isEmpty())
         {
             
@@ -80,11 +88,19 @@ class TrafficLight implements Runnable{
                 waitlist.add(t);
             }
         }
+        sem.release();
     }
 
     void updateList(){
         if(!waitlist.isEmpty())
         {
+            
+            try{
+                sem.acquire();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
             Iterator<Pair<Integer,Integer>> iterator=waitlist.iterator();
             while(iterator.hasNext())
             {
@@ -104,12 +120,21 @@ class TrafficLight implements Runnable{
                     extra=6;
                 }
             }
+            sem.release();
         }
     }
 
     public void run(){
         while(true){
-            Integer time = TrafficLightSystem.time;
+            Integer time=0;
+            try{
+                TrafficLightSystem.semt.acquire();
+                time = TrafficLightSystem.time;
+                TrafficLightSystem.semt.release();
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            } 
             updateList();
             if(TrafficLightSystem.idTimeMap.containsKey(time))
             {
@@ -150,7 +175,7 @@ class TrafficLight implements Runnable{
             catch (Exception e)  
             { 
                 e.printStackTrace();
-            }         
+            }       
         }
     }
 }

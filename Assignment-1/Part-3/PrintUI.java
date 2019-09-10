@@ -25,36 +25,39 @@ class PrintUI extends JFrame implements ActionListener{
 
     public void actionPerformed(ActionEvent e){
         String s = e.getActionCommand();
-        if(s.equals("Print Status")){
+        if(s.equals("Print Status") || s.equals("Refresh Window")){
             Integer time = TrafficLightSystem.time;
             int tid=((time)/60)%3;
             tid++;
             int remTime = 60-time%60;
             String ans="";
-            ans=ans+("<html>|   Traffic Light   |   Status    |   Time    |<br/>");
+            ans+="<html><head><style>table, th, td {border: 1px solid black;}</style></head><body><h3>Traffic Light Status</h3><br/>";
+
+            ans=ans+("<table><tr><th>Traffic Light</th><th>Status</th><th>Time</th></tr>");
             if(tid==1){
-                ans=ans+("|        T1         |    Green    |   " + Integer.toString(remTime) +"  |<br/>");
+                ans=ans+("<tr><th>T1</th><th>Green</th><th>" + Integer.toString(remTime) +"</th></tr>");
             }
             else{
-                ans=ans+("|        T1         |    Red      |    --     |<br/>");
+                ans=ans+("<tr><th>T1</th><th>Red</th><th>---</th></tr>");
             }
             
             if(tid==2){
-                ans=ans+("|        T2         |    Green    |" + Integer.toString(remTime) +"  |<br/>");
+                ans=ans+("<tr><th>T2</th><th>Green</th><th>" + Integer.toString(remTime) +"</th></tr>");
             }
             else{
-                ans+=("|        T2         |    Red      |    --     |<br/>");
+                ans+=("<tr><th>T2</th><th>Red</th><th>---</th></tr>");
             }
             if(tid==3){
-                ans+=("|        T3         |    Green    |" + Integer.toString(remTime) +"  |<br/>");
+                ans+=("<tr><th>T3</th><th>Green</th><th>" + Integer.toString(remTime) +"</th></tr>");
             }
             else{
-                ans+=("|        T3         |    Red      |    --     |<br/>" );
-            } 
-            ans+=(TrafficLightSystem.getAns(1).replaceAll(">", "&gt;").replaceAll("\n", "<br/>"));
-            ans+=(TrafficLightSystem.getAns(2).replaceAll(">", "&gt;").replaceAll("\n", "<br/>") );
-           ans+=(TrafficLightSystem.getAns(3).replaceAll(">", "&gt;").replaceAll("\n", "<br/>"));
-           ans+=(TrafficLightSystem.get().replaceAll(">", "&gt;").replaceAll("\n", "<br/>") + "</html>");
+                ans+=("<tr><th>T3</th><th>Red</th><th>---</th></tr></table><br/><br/>" );
+            }
+            ans+= "<h3>Current Traffic Status</h3><br/><table><tr><th>Vehicle</th><th>Source</th><th>Destination</th><th>Status</th><th>Remaining Time</th></tr>";
+            ans+=(TrafficLightSystem.getAns(1));
+            ans+=(TrafficLightSystem.getAns(2));
+            ans+=(TrafficLightSystem.getAns(3));
+            ans+=(TrafficLightSystem.get()+ "</table></body></html>");
             l1.setText(ans);
         }
         else 

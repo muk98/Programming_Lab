@@ -2,6 +2,7 @@ package com;
 
 import java.util.*; 
 import java.util.concurrent.CyclicBarrier;
+
 import java.io.File;
 import java.util.Scanner; 
 import java.awt.event.*; 
@@ -9,22 +10,28 @@ import javax.swing.*;
 
 public class InputFromUI extends JFrame implements ActionListener { 
 	// JTextField 
-	static JTextField t; 
+	
 
 	// JFrame 
 	static JFrame f; 
 
 	// JButton 
-	static JButton N; 
-    static JButton S;
-    static JButton E; 
-    static JButton W;
+	// static JButton N; 
+    // static JButton S;
+    // static JButton E; 
+    // static JButton W;
     static JButton done;
     static JButton add;
-    static JButton submit;
+    // static JButton submit;
 	// label to display text 
-	static JLabel l; 
-
+    static JLabel l; 
+    static JLabel i; 
+    static JLabel o; 
+    static JLabel ti; 
+    static JLabel e;
+    static JTextField in;
+    static JTextField out;  
+    static JTextField t; 
     Character inDir;
     Character outDir;
     Integer arrivaTime;
@@ -36,58 +43,44 @@ public class InputFromUI extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) 
 	{      
         String s = e.getActionCommand(); 
-        if((l.getText()=="Choose incoming direction")||(l.getText()=="Please select incoming direction!!!!"))
+        if(s.charAt(0)=='D')
         {
-           inDir=s.charAt(0); 
-           if(inDir=='D'||inDir=='s'||inDir=='A')
-           {
-               l.setText("Please select incoming direction!!!!");
-           }
-           else
-            l.setText("Choose outgoing direction");
+            TrafficLightSystem.inputBool=false;
+            f.dispose();
         }
-        else if((l.getText()=="Choose outgoing direction")||(l.getText()=="Please select outgoing direction!!!!"))
+        else
         {
-            outDir=s.charAt(0);
-            if(outDir=='D'||outDir=='s'||outDir=='A')
+            if(in.getText().equals("")||(!in.getText().equals("E")&&!in.getText().equals("W")&&!in.getText().equals("S")))
             {
-                l.setText("Please select outgoing direction!!!!");
+                l.setText("* incoming direction as E/W/S");
+            }
+            else if(out.getText().equals("")||(!out.getText().equals("E")&&!out.getText().equals("W")&&!out.getText().equals("S")))
+            {
+                l.setText("* outgoing direction as E/W/S");
+            }
+            else if(t.getText().equals("")  )
+            {
+                l.setText("* time as integer");
             }
             else
-            l.setText("Enter start time");
-        }
-        else if((l.getText()=="Enter start time")||(l.getText()=="Please Specify time and click Enter"))
-        {
-            if(s.charAt(0)!='s')
             {
-                l.setText("Please Specify time and click Enter");
-            }
-            else{
                 Integer arrivalTime=Integer.parseInt(t.getText());
-                Character inDir = this.inDir;
-                Character outDir = this.outDir;
+                Character inDir = in.getText().charAt(0);
+                Character outDir = out.getText().charAt(0);
                 Pair<Character,Character>temp = new Pair(inDir,outDir);
                 TrafficLightSystem.idDirMap.put(id,temp);
                 if(TrafficLightSystem.idTimeMap.get(arrivalTime)==null){
                     List<Integer>tt =new LinkedList<>();
                     TrafficLightSystem.idTimeMap.put(arrivalTime,tt);
                 }
-                TrafficLightSystem.idTimeMap.get(arrivalTime).add(id++);
-                l.setText("Done or Wanna Add?");
-            } 	
-        } 
-        else
-        {
-            if(s.charAt(0)=='A')
-                l.setText("Choose incoming direction");
-            else if(s.charAt(0)=='D')
-            {
-                TrafficLightSystem.inputBool=false;
-                f.dispose();
-            }
-            else
-            {
-                l.setText("Please choose Add or Done!!");
+                System.out.println("sdfsfssss"+Integer.toString(arrivalTime));
+                TrafficLightSystem.idTimeMap.get(arrivalTime).add(id++);  
+                System.out.print(TrafficLightSystem.idTimeMap);
+
+                l.setText("* added");
+                t.setText("");
+                out.setText("");
+                in.setText("");
             }
         }
     }

@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.Scanner; 
 import java.awt.event.*; 
 import javax.swing.*;
+import com.*;
 
 public class PrintOutputUI extends JFrame implements ActionListener{
 
@@ -13,10 +14,11 @@ public class PrintOutputUI extends JFrame implements ActionListener{
     static JButton showStatus;
     static JButton showOutput;
     static JLabel l1;
+    static JFrame statusFrame;
 
     PrintOutputUI(){  
+        statusFrame = null;
     }
-
     public void actionPerformed(ActionEvent e){
         String s = e.getActionCommand();
         if(s.equals("Show Output")){
@@ -24,7 +26,9 @@ public class PrintOutputUI extends JFrame implements ActionListener{
             l1.setText(ans);
         }
         if(s.equals("Print Status")){
-            TrafficLightSystem.printStatus();
+            if(statusFrame!=null)
+                statusFrame.dispose();
+            statusFrame = TrafficLightSystem.printStatus();
         }
     }
 }
