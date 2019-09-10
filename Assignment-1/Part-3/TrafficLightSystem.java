@@ -1,3 +1,8 @@
+/*
+* Author:  B.T.Langulya and Mukul Verma
+* Summary: This module contains TrafficLightSystem class which simulates the working of the controller that controls
+*          the working of the Three traffic lights and provides the necessary input to each of them at each second
+*/ 
 package com;
 
 import java.util.*; 
@@ -10,25 +15,39 @@ import javax.swing.*;
 
 
 public class TrafficLightSystem implements Runnable{
+    /* Time is maintained in this variable */
     public static int time;
+
+    /* Cyclic Barrier used to make sure all threads complete their work at same time */
     public static CyclicBarrier newBarrier = new CyclicBarrier(5);
+
+    /* idTimeMap to store the id of cars with respect to the time of arrival  */
     public static HashMap<Integer,List<Integer>> idTimeMap;
-    public static HashMap<Integer,Pair<Character,Character>> idDirMap;    
+   
+    /* idDirMap to store incoming and outgoing directions for each user id */
+    public static HashMap<Integer,Pair<Character,Character>> idDirMap;  
+
+    /* this bool is to represent whether input is still being taken or not */ 
     public static Boolean inputBool;
+
+    /* 3 trafficlights and 1 unrestricted Dir class are generated*/
     public static TrafficLight l1;
     public static TrafficLight l2;
     public static TrafficLight l3;
     public static UnrestrictedDir d;
+
+    /* This label is created for diplaying time and arrival of vehicles */
     public static JLabel l;
+
+    /* This is used to store state of previous vehicle if no vehicle arrives this second */
     public static String PreviousStatus;
+
+    /* Different semaphores declared to synchronize different blocks of code */
     public static Semaphore sem1,sem2,sem3,semt,semu;
     public static void main(String[] args){
-        File file = new File("input.txt");
         idTimeMap =new HashMap<>();
         idDirMap=new HashMap<>();
         PreviousStatus="";
-        inputBool=true;
-        takeInputFromUI();
         l=new JLabel("");
         sem1=new Semaphore(1);
         sem2=new Semaphore(1);
@@ -36,31 +55,32 @@ public class TrafficLightSystem implements Runnable{
         semt=new Semaphore(1);
         semu=new Semaphore(1);
 
+        /* The process remains in while loop till we collect all input from the UI */
+        inputBool=true;
+        takeInputFromUI();
         while(inputBool){
             System.out.print("");
             continue;
         }
-        System.out.println("input Done");
-        // printStatus();
+        /* Output frame is called to display the time */
         printOutputUI(l);
-
-        Integer id=0;
         
+        /* Thread instance of TrafficLightSystem class is created and it starts running */
         TrafficLightSystem controller = new TrafficLightSystem();
-       
         Thread contThread = new Thread(controller);
         contThread.run();
     }  
 
     public void run(){
-        System.out.println("System Starts.......");
         
+        /*All TrafficLights and UnrestrictedDir are initialised with appropriate semaphores */
          l1 = new TrafficLight(1,sem1);
          l2 = new TrafficLight(2,sem2);
          l3 = new TrafficLight(3,sem3);
          d=new UnrestrictedDir(semu);
 
         
+        /*Thread instances are created and threads start running */
         Thread t1 = new Thread(l1);
         Thread t2 = new Thread(l2);
         Thread t3 = new Thread(l3);
@@ -72,6 +92,7 @@ public class TrafficLightSystem implements Runnable{
         t4.start();
 
         while(true){
+            /* To simulate 1 second we make thread sleep for 1000 milli seconds*/
             try
             { 
                 Thread.sleep(1000);
@@ -81,6 +102,7 @@ public class TrafficLightSystem implements Runnable{
                 e.printStackTrace();
             }
 
+            /*Will make the thread wait for all other threads to compete their work */
             try
             { 
                 TrafficLightSystem.newBarrier.await();
@@ -90,22 +112,26 @@ public class TrafficLightSystem implements Runnable{
                 e.printStackTrace();
             } 
             
-            // System.out.println(time);
-            // this.printDetails(l1,l2,l3,d);
-            
+            /*Status of vehicles arriving at this time */
             String status = TrafficLightSystem.waitorpass();
+
+            /*If no vehicles at this time then print same status as last second */
             if(!status.equals("")){
                 PreviousStatus = status;
             }
             
+            /*Changing the string to html tag to set it in the label */
             String ans = "<html>Time: "+Integer.toString(TrafficLightSystem.time)+" </br>"+PreviousStatus.replaceAll(">", "&gt;").replaceAll("\n", "<br/>")+"</html>";
             
+            /* Semaphore is acquired for time. As we dont want time to change before we display the data */
             try{
                 semt.acquire();
             }
             catch(Exception e){
                 e.printStackTrace();
             }
+
+            /* The time and status is diplayed */
             l.setText(ans);
             time++;
             semt.release();
@@ -113,7 +139,8 @@ public class TrafficLightSystem implements Runnable{
             }
         }
     
-        public static String getAns(int id1)
+    /* */
+        public static String getDataFromTrafficLight(int id1)
         {
             Iterator iterator1;
             Iterator<Integer>  iterator2;
@@ -152,8 +179,6 @@ public class TrafficLightSystem implements Runnable{
             }
             
             String ans="";
-            // ans = 
-            // ans+="Waiting for T"+Integer.toString(id1)+"\n";
 
             while(iterator1.hasNext()){
                 Pair<Integer,Integer> t=(Pair<Integer,Integer>)iterator1.next();
@@ -179,7 +204,7 @@ public class TrafficLightSystem implements Runnable{
             return ans; 
         }
         
-        public static String get()
+        public static String getDatafromUD()
         {
 
 
@@ -352,54 +377,53 @@ public class TrafficLightSystem implements Runnable{
         
         InputFromUI uiInp = new InputFromUI();
         InputFromUI te = new InputFromUI(); 
-        uiInp.f = new JFrame("textfield"); 
-        uiInp.f.setBounds(100, 100, 500, 350);
-        uiInp.f.setResizable(false);
-		uiInp.f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		uiInp.f.getContentPane().setLayout(null);
+        uiInp.frame = new JFrame("textfield"); 
+        uiInp.frame.setBounds(100, 100, 500, 350);
+        uiInp.frame.setResizable(false);
+		uiInp.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		uiInp.frame.getContentPane().setLayout(null);
     
-        uiInp.i = new JLabel("Incoming Direction(S/W/E)");
-		uiInp.i.setBounds(65, 31, 200, 20);
-		uiInp.f.getContentPane().add(uiInp.i);
-		uiInp.in = new JTextField();
-		uiInp.in.setBounds(270, 28, 86, 25);
-		uiInp.f.getContentPane().add(uiInp.in);
-        uiInp.in.setColumns(10);
-        uiInp.o = new JLabel("Outgoing Direction(S/W/E)");
-		uiInp.o.setBounds(65, 75, 200, 20);
-		uiInp.f.getContentPane().add(uiInp.o);
+        uiInp.inDirLabel = new JLabel("Incoming Direction(S/W/E)");
+		uiInp.inDirLabel.setBounds(65, 31, 200, 20);
+		uiInp.frame.getContentPane().add(uiInp.inDirLabel);
+		uiInp.inDirText = new JTextField();
+		uiInp.inDirText.setBounds(270, 28, 86, 25);
+		uiInp.frame.getContentPane().add(uiInp.inDirText);
+        uiInp.inDirText.setColumns(10);
+        uiInp.outDirLabel = new JLabel("Outgoing Direction(S/W/E)");
+		uiInp.outDirLabel.setBounds(65, 75, 200, 20);
+		uiInp.frame.getContentPane().add(uiInp.outDirLabel);
 		
-		uiInp.out = new JTextField();
-		uiInp.out.setBounds(270, 75,86, 25);
-		uiInp.f.getContentPane().add(uiInp.out);
-        uiInp.out.setColumns(10);
+		uiInp.outDirText = new JTextField();
+		uiInp.outDirText.setBounds(270, 75,86, 25);
+		uiInp.frame.getContentPane().add(uiInp.outDirText);
+        uiInp.outDirText.setColumns(10);
 
 
-        
-        uiInp.ti = new JLabel("Time(in integer as seconds)");
-		uiInp.ti.setBounds(65, 120, 200, 20);
-		uiInp.f.getContentPane().add(uiInp.ti);
+        uiInp.timeLabel = new JLabel("Time(in integer as seconds)");
+		uiInp.timeLabel.setBounds(65, 120, 200, 20);
+		uiInp.frame.getContentPane().add(uiInp.timeLabel);
 		
-		uiInp.t = new JTextField();
-		uiInp.t.setBounds(270, 120,86, 25);
-		uiInp.f.getContentPane().add(uiInp.t);
-        uiInp.t.setColumns(10);
+		uiInp.incomingTimeText = new JTextField();
+		uiInp.incomingTimeText.setBounds(270, 120,86, 25);
+		uiInp.frame.getContentPane().add(uiInp.incomingTimeText);
+        uiInp.incomingTimeText.setColumns(10);
 
-        uiInp.l = new JLabel("");
-		uiInp.l.setBounds(65, 150, 500, 20);
-		uiInp.f.getContentPane().add(uiInp.l);
+        uiInp.infoLabel = new JLabel("");
+		uiInp.infoLabel.setBounds(65, 150, 500, 20);
+		uiInp.frame.getContentPane().add(uiInp.infoLabel);
 
         uiInp.add = new JButton("Add");
 		
 		uiInp.add.setBounds(65, 170, 100, 23);
-        uiInp.f.getContentPane().add(uiInp.add);
+        uiInp.frame.getContentPane().add(uiInp.add);
         uiInp.done = new JButton("Done");
         uiInp.done.setBounds(200, 170, 100, 23);
-        uiInp.f.getContentPane().add(uiInp.done);
+        uiInp.frame.getContentPane().add(uiInp.done);
 
         uiInp.done.addActionListener(te);
         uiInp.add.addActionListener(te);
-		uiInp.f.show();
+		uiInp.frame.show();
 
     }
 
@@ -430,17 +454,15 @@ public class TrafficLightSystem implements Runnable{
     }
     
     public static void printOutputUI(JLabel l){
+        System.out.println("oolalaa");
         PrintOutputUI outUI = new PrintOutputUI();
         
         outUI.f = new JFrame("Output UI"); 
         outUI.l1 = l;
         outUI.showStatus = new JButton("Print Status");
-        // outUI.showOutput = new JButton("Print Status");
-        //showOutput = outUI.showOutput;
 
         PrintOutputUI actoutUI = new PrintOutputUI();
         outUI.showStatus.addActionListener(actoutUI);
-        // outUI.showOutput.addActionListener(actoutUI);
 
         JPanel p = new JPanel();
         p.add(outUI.l1);

@@ -54,10 +54,10 @@ class PrintUI extends JFrame implements ActionListener{
                 ans+=("<tr><th>T3</th><th>Red</th><th>---</th></tr></table><br/><br/>" );
             }
             ans+= "<h3>Current Traffic Status</h3><br/><table><tr><th>Vehicle</th><th>Source</th><th>Destination</th><th>Status</th><th>Remaining Time</th></tr>";
-            ans+=(TrafficLightSystem.getAns(1));
-            ans+=(TrafficLightSystem.getAns(2));
-            ans+=(TrafficLightSystem.getAns(3));
-            ans+=(TrafficLightSystem.get()+ "</table></body></html>");
+            ans+=(TrafficLightSystem.getDataFromTrafficLight(1));
+            ans+=(TrafficLightSystem.getDataFromTrafficLight(2));
+            ans+=(TrafficLightSystem.getDataFromTrafficLight(3));
+            ans+=(TrafficLightSystem.getDatafromUD()+ "</table></body></html>");
             l1.setText(ans);
         }
         else 

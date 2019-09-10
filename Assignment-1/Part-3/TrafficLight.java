@@ -24,10 +24,8 @@ class TrafficLight implements Runnable{
 
     void emptyWait(Integer time,Integer carId)
     {   
-        // int time = TrafficLightSystem.time;System.out.println(time);
         Integer tid=((time)/60)%3;
         tid++;
-        System.out.println(Integer.toString(carId));
         try{
             sem.acquire();
         }
@@ -114,7 +112,6 @@ class TrafficLight implements Runnable{
                     }
                     catch(Exception e){
                         e.printStackTrace();
-                        System.out.println("god save usssss");
                     }
                     empty=true;
                     extra=6;
@@ -142,7 +139,6 @@ class TrafficLight implements Runnable{
                 Iterator<Integer> iterator = TrafficLightSystem.idTimeMap.get(time).iterator();
                 while(iterator.hasNext()) {
                     Integer id = iterator.next();
-                    // System.out.println(id);
                     Pair<Character,Character> car = TrafficLightSystem.idDirMap.get(id);
                     if(this.id==1 && car.first=='S' && car.second=='E')
                     {

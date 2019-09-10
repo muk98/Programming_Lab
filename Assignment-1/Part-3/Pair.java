@@ -1,3 +1,7 @@
+/*
+* Author: B Tushara Langulya
+* Summary: This module contains template for Pair.
+*/
 package com;
 
 class Pair<A, B> {
