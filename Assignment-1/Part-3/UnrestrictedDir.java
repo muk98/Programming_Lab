@@ -1,3 +1,10 @@
+/**
+ * Author: Mukul Verma, Tushara Langulya
+ * Summary: This module contains the class which stores the information related to cars which passed 
+ *          through the directions which had no restrictions in them (S to W, W to E, E to S)
+ *         
+ */
+
 package com;
 import java.util.concurrent.Semaphore;
 import com.Pair;
@@ -8,6 +15,7 @@ class UnrestrictedDir implements Runnable{
     Semaphore sem;
     UnrestrictedDir(Semaphore sem)
     {
+        /*Initialising the list of passed cars and semaphore on this list */
         finishlist=new LinkedList<>();
         this.sem=sem;
     }
@@ -16,6 +24,9 @@ class UnrestrictedDir implements Runnable{
     {
         while(true){
             Integer time=0;
+            /**Get the time of the system, lock is required as main thread can increase the time while
+             * accessing here.
+             */
             try{
                 TrafficLightSystem.semt.acquire();
                 time = TrafficLightSystem.time;
@@ -26,19 +37,25 @@ class UnrestrictedDir implements Runnable{
             } 
         if(TrafficLightSystem.idTimeMap.containsKey(time))
         {
+            /*Get all id's of the car which arrive at this time */
             
             Iterator<Integer> iterator = TrafficLightSystem.idTimeMap.get(time).iterator();
             while(iterator.hasNext()) {
                 Integer carId=iterator.next();
-                System.out.println("sdsdsd");
-                System.out.println(carId);
+
+                /* Get the incoming and outgoing direction of the arrived car */
                 Pair<Character,Character>  car = TrafficLightSystem.idDirMap.get(carId);
+                
+                /**Acquire the lock as the main thread can be accessing the its data for printing*/
                 try{
                     sem.acquire();
                 }
                 catch(Exception e){
                     e.printStackTrace();
                 }
+
+                /*Check whether there is any restriction in the cars directions. If no restrictions 
+                the car will pass so add it in the finish list */
                 if(car.first=='S' && car.second=='W')
                 {
                    finishlist.add(carId);
@@ -51,11 +68,14 @@ class UnrestrictedDir implements Runnable{
                 {
                     finishlist.add(carId);
                 }
+
+                /**Release the lock*/
                 sem.release();
             } 
           
         }
 
+        /**call the await method and wait for other threads to join*/
         try
         {
             TrafficLightSystem.newBarrier.await();
@@ -64,6 +84,7 @@ class UnrestrictedDir implements Runnable{
         {
             e.printStackTrace();
         }
+        /**Small sleep to synchronize the working of threads*/
         try
             { 
                 Thread.sleep(20);
