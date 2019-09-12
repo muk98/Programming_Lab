@@ -151,18 +151,42 @@ class PackagingUnitThread implements Runnable {
                             
                             /*Decrease the count of the bottle chosen and set the next bottle that will be withdrawn, accordingly*/
                             if(this.currentBottle.type==1) {
-                                rel.lock();
-                                unfinishedTray.totalB1--;
-                                rel.unlock();
-                                if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
-                                else if(unfinishedTray.totalB1>0) this.currBottleToDraw=1;
+                                if(unfinishedTray.totalB1==0)
+                                {
+                                    rel.lock();
+                                    unfinishedTray.totalB2--;
+                                    rel.unlock();
+                                    this.currentBottle.type=2;
+                                    if(unfinishedTray.totalB1>0) this.currBottleToDraw=1;
+                                    else if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
+                                }
+                                else
+                                {
+                                    rel.lock();
+                                    unfinishedTray.totalB1--;
+                                    rel.unlock();
+                                    if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
+                                    else if(unfinishedTray.totalB1>0) this.currBottleToDraw=1;
+                                }
                             }
                             else{
-                                rel.lock();
-                                unfinishedTray.totalB2--;
-                                rel.unlock();
-                                if(unfinishedTray.totalB1>0) this.currBottleToDraw=1;
-                                else if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
+                                if(unfinishedTray.totalB2==0)
+                                {
+                                    rel.lock();
+                                    unfinishedTray.totalB1--;
+                                    rel.unlock();
+                                    this.currentBottle.type=1;
+                                    if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
+                                    else if(unfinishedTray.totalB1>0) this.currBottleToDraw=1;
+                                }
+                                else
+                                {
+                                    rel.lock();
+                                    unfinishedTray.totalB2--;
+                                    rel.unlock();
+                                    if(unfinishedTray.totalB1>0) this.currBottleToDraw=1;
+                                    else if(unfinishedTray.totalB2>0) this.currBottleToDraw=2;
+                                }
                             }
                             /*switch on the flag to show that a bottle is curretly being processed*/
                             this.empty=false;
