@@ -30,13 +30,13 @@ public class TrafficLightSystem implements Runnable{
     public static Boolean inputBool;
 
     /* 3 trafficlights and 1 unrestricted Dir class are generated*/
-    public static TrafficLight l1;
-    public static TrafficLight l2;
-    public static TrafficLight l3;
-    public static UnrestrictedDir d;
+    public static TrafficLight T1;
+    public static TrafficLight T2;
+    public static TrafficLight T3;
+    public static UnrestrictedDir unrestrictedDir;
 
     /* This label is created for diplaying time and arrival of vehicles */
-    public static JLabel l;
+    public static JLabel displayLabel;
 
     /* This is used to store state of previous vehicle if no vehicle arrives this second */
     public static String PreviousStatus;
@@ -47,7 +47,7 @@ public class TrafficLightSystem implements Runnable{
         idTimeMap =new HashMap<>();
         idDirMap=new HashMap<>();
         PreviousStatus="";
-        l=new JLabel("");
+        displayLabel=new JLabel("");
 
         /*sempahore lock instance for each traffic light and other synchronization*/
         sem1=new Semaphore(1);
@@ -65,7 +65,7 @@ public class TrafficLightSystem implements Runnable{
         }
 
         /* Output frame is called to display the time and status of input cars*/
-        printOutput(l);
+        printOutput(displayLabel);
         
         /* Thread instance of TrafficLightSystem class is created and it starts running */
         TrafficLightSystem controller = new TrafficLightSystem();
@@ -76,17 +76,17 @@ public class TrafficLightSystem implements Runnable{
     public void run(){
         
         /*Create Traffic Lights instance with their respective semaphores*/
-        l1 = new TrafficLight(1,sem1);
-        l2 = new TrafficLight(2,sem2);
-        l3 = new TrafficLight(3,sem3);
-        d=new UnrestrictedDir(semu);
+        T1 = new TrafficLight(1,sem1);
+        T2 = new TrafficLight(2,sem2);
+        T3 = new TrafficLight(3,sem3);
+        unrestrictedDir=new UnrestrictedDir(semu);
 
         
         /*Thread instances are created*/
-        Thread t1 = new Thread(l1);
-        Thread t2 = new Thread(l2);
-        Thread t3 = new Thread(l3);
-        Thread t4 = new Thread(d);
+        Thread t1 = new Thread(T1);
+        Thread t2 = new Thread(T2);
+        Thread t3 = new Thread(T3);
+        Thread t4 = new Thread(unrestrictedDir);
 
         /*Start the threads*/
         t1.start();
@@ -135,7 +135,7 @@ public class TrafficLightSystem implements Runnable{
             }
 
             /* The time and status is diplayed*/
-            l.setText(ans);
+            displayLabel.setText(ans);
             time++;
             semt.release();
             }
@@ -156,8 +156,8 @@ public class TrafficLightSystem implements Runnable{
             */
             if(id1==1)
             {
-                iterator1= l1.waitlist.iterator();
-                iterator2= l1.finishlist.iterator();
+                iterator1= T1.waitList.iterator();
+                iterator2= T1.finishList.iterator();
                 try{
                     sem1.acquire();
                 }
@@ -167,8 +167,8 @@ public class TrafficLightSystem implements Runnable{
             }  
             else if(id1==2)
             {
-                iterator1= l2.waitlist.iterator();
-                iterator2= l2.finishlist.iterator();
+                iterator1= T2.waitList.iterator();
+                iterator2= T2.finishList.iterator();
                 try{
                     sem2.acquire();
                 }
@@ -178,8 +178,8 @@ public class TrafficLightSystem implements Runnable{
             }
             else
             {
-                iterator1= l3.waitlist.iterator();
-                iterator2= l3.finishlist.iterator();
+                iterator1= T3.waitList.iterator();
+                iterator2= T3.finishList.iterator();
                 try{
                     sem3.acquire();
                 }
@@ -238,7 +238,7 @@ public class TrafficLightSystem implements Runnable{
             * when accessing the list the thread might change the 
             * the list.
             */
-            Iterator<Integer> iterator2= d.finishlist.iterator();
+            Iterator<Integer> iterator2= unrestrictedDir.finishList.iterator();
             String ans="";
             try{
                 semu.acquire();
@@ -305,7 +305,7 @@ public class TrafficLightSystem implements Runnable{
              * else waiting.
             */
             ans+="Vehicle: "+Integer.toString(id)+" ";
-            if(l1.finishlist.contains(id) || l2.finishlist.contains(id)||l3.finishlist.contains(id)||d.finishlist.contains(id))
+            if(T1.finishList.contains(id) || T2.finishList.contains(id)||T3.finishList.contains(id)||unrestrictedDir.finishList.contains(id))
                 ans+="Pass\n";
             else{
                 ans+="Wait\n";       
@@ -437,14 +437,14 @@ public class TrafficLightSystem implements Runnable{
      * Print the output screen on the screen
      * @param label label to print on the output screen
      */
-    public static void printOutput(JLabel label){
+    public static void printOutput(JLabel displayLabel){
 
         /**Create an instance of output window*/
         OutputScreen outUI = new OutputScreen();
         
         /**Create a new frame*/
         outUI.frame = new JFrame("Output UI"); 
-        outUI.label = label;
+        outUI.label = displayLabel;
         outUI.showStatus = new JButton("Print Status");
 
         /**Create actionListener for the ui*/

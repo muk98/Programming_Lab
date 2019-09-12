@@ -11,12 +11,12 @@ import com.Pair;
 import java.util.*; 
 
 class UnrestrictedDir implements Runnable{
-    LinkedList<Integer>finishlist;
+    LinkedList<Integer>finishList;
     Semaphore sem;
     UnrestrictedDir(Semaphore sem)
     {
         /*Initialising the list of passed cars and semaphore on this list */
-        finishlist=new LinkedList<>();
+        finishList=new LinkedList<>();
         this.sem=sem;
     }
 
@@ -58,15 +58,15 @@ class UnrestrictedDir implements Runnable{
                 the car will pass so add it in the finish list */
                 if(car.first=='S' && car.second=='W')
                 {
-                   finishlist.add(carId);
+                   finishList.add(carId);
                 }
                 else if(car.first=='E'&&car.second=='S')
                 {
-                    finishlist.add(carId);
+                    finishList.add(carId);
                 }
                 else if(car.first=='W'&&car.second=='E')
                 {
-                    finishlist.add(carId);
+                    finishList.add(carId);
                 }
 
                 /**Release the lock*/

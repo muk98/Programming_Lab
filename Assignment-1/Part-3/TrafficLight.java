@@ -16,10 +16,10 @@ class TrafficLight implements Runnable{
     int id;
 
     /**Lists that store the waiting cars, first value store the car id and the second stores the waiting time*/
-    LinkedList<Pair<Integer,Integer>>  waitlist;
+    LinkedList<Pair<Integer,Integer>>  waitList;
 
     /**Lists that store the car ids that are already passed*/
-    LinkedList<Integer> finishlist;
+    LinkedList<Integer> finishList;
 
     /**Boolean to tell whether there a car is already passed in the same sec when other car has arrived*/
     boolean empty;
@@ -38,8 +38,8 @@ class TrafficLight implements Runnable{
     TrafficLight(int id,Semaphore sem)
     {
         this.id=id;
-        waitlist = new  LinkedList<>(); 
-        finishlist=new LinkedList<>();
+        waitList = new  LinkedList<>(); 
+        finishList=new LinkedList<>();
         empty=false;
         extraTime=0;
         this.sem=sem;
@@ -67,7 +67,7 @@ class TrafficLight implements Runnable{
         /**Check whether traffic light on which car has arrived and the light that is on are same or not
          * and if such is case whether queue is empty or not.
         */
-        if(id==tid && waitlist.isEmpty())
+        if(id==tid && waitList.isEmpty())
         {
             /**Calculate the waiting time*/
             Integer waitingTime=0;
@@ -84,7 +84,7 @@ class TrafficLight implements Runnable{
             {
                 waitingTime+=120+60-time%60;
                 Pair<Integer,Integer> t =new Pair(carId,waitingTime);
-                waitlist.add(t); 
+                waitList.add(t); 
             }
             /**If no car has passed in that second and sufficient time is there to pass*/
             else if(waitingTime==0){
@@ -98,11 +98,11 @@ class TrafficLight implements Runnable{
                 if(extraTime>0)
                 {   
                     Pair<Integer,Integer> t =new Pair(carId,extraTime);
-                    waitlist.add(t);
+                    waitList.add(t);
                 }
                 else
                 {
-                    finishlist.add(carId);
+                    finishList.add(carId);
                     extraTime=6;
                 }
             }
@@ -110,34 +110,34 @@ class TrafficLight implements Runnable{
             else
             {
                 Pair<Integer,Integer> t =new Pair(carId,waitingTime);
-                waitlist.add(t); 
+                waitList.add(t); 
             }       
         }
         /**If both the lights are different and waiting list is empty for the traffic light on which car has arrived*/
-        else if(waitlist.isEmpty())
+        else if(waitList.isEmpty())
         {
 
             /**Calculate the waiting time*/
             Integer waitingTime = 60*((time)/60)+60*((id-tid+3)%3)-time;
             Pair<Integer,Integer> t =new Pair(carId,waitingTime);
-            waitlist.add(t); 
+            waitList.add(t); 
         }
         else 
         {
             /**Else the waiting time will be the waiting time of the last car+6 and further sufficient time
              * left condition is checked.
             */
-            Integer waitingTime = waitlist.getLast().second+6;
+            Integer waitingTime = waitList.getLast().second+6;
             if((time+waitingTime)%60>54)
             {
                 waitingTime+=120+60-(time+waitingTime)%60;
                 Pair<Integer,Integer> t =new Pair(carId,waitingTime);
-                waitlist.add(t); 
+                waitList.add(t); 
             }
             else
             {
                 Pair<Integer,Integer> t =new Pair(carId,waitingTime);
-                waitlist.add(t);
+                waitList.add(t);
             }
         }
 
@@ -152,7 +152,7 @@ class TrafficLight implements Runnable{
     void updateWaitingList(){
 
         /**Update when there is car waiting */
-        if(!waitlist.isEmpty())
+        if(!waitList.isEmpty())
         {
             
              /**Acquire the lock as the main thread can be accessing the its data for printing*/
@@ -164,7 +164,7 @@ class TrafficLight implements Runnable{
             }
 
             /**Iterate over the waiting List*/
-            Iterator<Pair<Integer,Integer>> iterator=waitlist.iterator();
+            Iterator<Pair<Integer,Integer>> iterator=waitList.iterator();
             while(iterator.hasNext())
             {
                 Pair<Integer,Integer> t = iterator.next();
@@ -177,7 +177,7 @@ class TrafficLight implements Runnable{
                  */
                 if(t.second<=0)
                 {
-                    finishlist.add(t.first);
+                    finishList.add(t.first);
                     try{
                         iterator.remove();
                     }
