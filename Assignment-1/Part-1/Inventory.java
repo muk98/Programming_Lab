@@ -34,7 +34,12 @@ class Inventory{
 		System.out.println("\n");	
 	}
 
-	/*Function to process the order*/
+
+	/**Function to process the order
+	 * @param orderId is the order ID
+	 * @param type is the type of the order
+	 * @param quantity is the quantity of the order
+	 */
 	public void processOrder(int orderId,char type,int quantity){
 		
 		switch (type) {	

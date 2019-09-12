@@ -13,9 +13,10 @@ import java.util.*;
 class UnrestrictedDir implements Runnable{
     LinkedList<Integer>finishList;
     Semaphore sem;
+
+    /*Initialising the list of passed cars and semaphore on this list */
     UnrestrictedDir(Semaphore sem)
     {
-        /*Initialising the list of passed cars and semaphore on this list */
         finishList=new LinkedList<>();
         this.sem=sem;
     }

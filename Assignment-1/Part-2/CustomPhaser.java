@@ -40,7 +40,10 @@ class CustomPhaser extends Phaser {
         this.slg = slg;  
     }
       
-    /*Override the onAdvance method of the Phasor superclass*/
+    /** Override the onAdvance method of the Phasor superclass
+     * @param phase is the second of processing
+     * @param registeredParties is the number of parties it expects before proceesing
+    */
 	@Override
 	protected boolean onAdvance(int phase, 
 								int registeredParties) 

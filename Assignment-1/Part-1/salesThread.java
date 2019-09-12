@@ -16,10 +16,11 @@ class salesThread extends Thread
 { 
 	ArrayList<Order> orders;
 	Inventory inventory;
-
+	
+	/* Orders and inventory is initialised for this thread */
 	salesThread(ArrayList<Order>orders,Inventory inventory)
 	{
-		/* Orders and inventory is initialised for this thread */
+
 		this.orders=orders;
 		this.inventory=inventory;
 	}

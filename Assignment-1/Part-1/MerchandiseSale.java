@@ -43,7 +43,12 @@ public class MerchandiseSale{
 		}
 	}	
 
-	/*This function returns an array of orders between start to end index in the batch data from the file input*/
+	/** This function returns an array of orders between start to end index in the batch data from the 
+	 * file input
+	 * @param fileInput is the list of strings read from file
+	 * @param start is the starting index of the list which we want to include in array
+	 * @param end is the ending index of the list which we want to include in array
+	 * */
 	static	ArrayList<Order> getOrders(List<String> fileInput,int start,int end){
 			ArrayList<Order> orders=new ArrayList<>();
 
@@ -57,7 +62,9 @@ public class MerchandiseSale{
 			return orders;
 		}
 	
-	/*File is read line by line and list of string is returned */
+	/**File is read line by line and list of string is returned 
+	 * @param fileName is the input filename 
+	*/
 	static List<String> readFileInList(String fileName){ 
 	    List<String> lines = Collections.emptyList(); 
 		try{ 

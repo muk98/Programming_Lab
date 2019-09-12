@@ -141,9 +141,10 @@ public class TrafficLightSystem implements Runnable{
             }
         }
     
-        /*This functions returns the cars status from each traffic light and returns it as a String in the
+
+        /**This functions returns the cars status from each traffic light and returns it as a String in the
         * form of html to show on the output status.
-        *  Parameters: id1 -> shows from which traffic light we need to get the data.
+        * @param id1 shows from which traffic light we need to get the data.
         */
         public static String getDataFromTrafficLight(int id1)
         {
@@ -231,7 +232,10 @@ public class TrafficLightSystem implements Runnable{
         }
         
 
-        /*This function returns the data of the cars that were passed unrestricted*/
+        /**  This function returns the data of the cars that were passed unrestricted
+        @return the status to be displayed in html format
+        
+        */
         public static String getDatafromUD(){
 
             /*Get the iterator of the data structures that hold the data.Aquire the lock as 
@@ -264,7 +268,7 @@ public class TrafficLightSystem implements Runnable{
 
             /*Release the lock*/
             semu.release();
-            System.out.println(ans);
+
             return ans; 
         }
 
@@ -435,7 +439,7 @@ public class TrafficLightSystem implements Runnable{
     
     /**
      * Print the output screen on the screen
-     * @param label label to print on the output screen
+     * @param displayLabel label to print on the output screen
      */
     public static void printOutput(JLabel displayLabel){
 
