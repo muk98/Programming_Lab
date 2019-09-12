@@ -53,11 +53,21 @@ class CustomPhaser extends Phaser {
         *  then push the bottle into the sealing tray.
         */
         if(pkg.pending){
-            rel.lock();
-            pkg.sealingTray.q.add(pkg.currentBottle);
-            System.out.println("transferred to sealing Tray "+ Integer.toString(pkg.currentBottle.type) + " "+  Integer.toString(pkg.currentBottle.id));
-            pkg.pending=false;
-            rel.unlock();
+            if(pkg.sealingTray.q.size() < pkg.sealingTray.size)
+            {
+                rel.lock();
+                pkg.sealingTray.q.add(pkg.currentBottle);
+                System.out.println("transferred to sealing Tray "+ Integer.toString(pkg.currentBottle.type) + " "+  Integer.toString(pkg.currentBottle.id));
+                pkg.pending=false;
+                /*Switch on the empty flag to show that currently packaging unit is not processing anything*/
+                pkg.empty=true;
+                rel.unlock();
+            }
+            else
+            {
+                pkg.empty=false;pkg.pending=false;
+            }
+           
         }
  
          /* At the end of the second, if Sealing unit has completed the sealing of a bottle
@@ -67,14 +77,20 @@ class CustomPhaser extends Phaser {
         {
             rel.lock();
             slg.pending=false;
-            if(slg.currentBottle.type == 1){
+            if(slg.currentBottle.type == 1 && slg.B1PackagingTray.q.size() < slg.B1PackagingTray.size)
+            {   
                 slg.B1PackagingTray.q.add(slg.currentBottle);
                 System.out.println("transferred to B1 Tray "+ Integer.toString(slg.currentBottle.type) + " "+  Integer.toString(slg.currentBottle.id));
-            }
-            else if(slg.currentBottle.type == 2){
+                slg.empty=true;
+                
+            }  
+            else if(slg.currentBottle.type == 2 && slg.B2PackagingTray.q.size() < slg.B2PackagingTray.size){
+               
+                slg.empty = true;
                 slg.B2PackagingTray.q.add(slg.currentBottle);
                 System.out.println("transferred to B2 Tray "+ Integer.toString(slg.currentBottle.type) + " "+  Integer.toString(slg.currentBottle.id));
-            }
+            }     
+    
             rel.unlock();
         }          
         

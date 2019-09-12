@@ -125,16 +125,13 @@ class PackagingUnitThread implements Runnable {
                         this.empty=true;
                         System.out.println("DONE!!" + Integer.toString(this.currentBottle.type));
                     }
-                    else if(this.sealingTray.q.size() < this.sealingTray.size){
+                    else {
                         /*Switch on the flag to show that packaging unit is idle and bottles needs to be pushed into the tray
                         *at the end of the second
                         */
                         this.pending=true;
-
-                        /*Switch on the empty flag to show that currently packaging unit is not processing anything*/
-                        this.empty=true;
                     }
-                   
+                 
                 }
                 /*If packaging unit is processing nothing and is not holding any bottle*/
                 else if(this.empty==true){

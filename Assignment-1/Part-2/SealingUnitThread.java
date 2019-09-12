@@ -125,16 +125,9 @@ class SealingUnitThread implements Runnable {
                     * at the end of the second.
                     * Switch on the empty flag to show that currently packaging unit is not processing anything
                     */
-                    else if(this.currentBottle.type == 1 && this.B1PackagingTray.q.size() < this.B1PackagingTray.size)
-                    {   
-                         
-                        this.empty=true;
+                    else {
                         this.pending=true;
-                    }  
-                    else if(this.currentBottle.type == 2 && this.B2PackagingTray.q.size() < this.B2PackagingTray.size){
-                        this.pending=true;
-                        this.empty = true;
-                    }      
+                    } 
                 }
                 /*If sealing unit is processing nothing and is not holding any bottle*/
                 else if(this.empty ==true){
