@@ -405,6 +405,9 @@ public class TrafficLightSystem implements Runnable{
         
         ui.label = new JLabel("");
         
+        // JScrollPane panel = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        // ui.frame.setContentPane(panel);
+
         /**Add button to close and refresh the window*/
         ui.showStatus = new JButton("Refresh Window");
         ui.endStatus = new JButton("Close Window");

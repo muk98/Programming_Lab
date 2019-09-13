@@ -52,7 +52,68 @@ class CustomPhaser extends Phaser {
         /* At the end of the second, if Packaging unit has completed the packaging of a bottle
         *  then push the bottle into the sealing tray.
         */
-        if(pkg.pending){
+
+        if(pkg.pending && slg.pending){
+            boolean flag=false;
+            if((slg.currentBottle.type == 1 && slg.B1PackagingTray.q.size() >= slg.B1PackagingTray.size) ||
+                (slg.currentBottle.type == 2 && slg.B2PackagingTray.q.size() >= slg.B2PackagingTray.size)){
+                flag=true;
+            }
+            if(pkg.sealingTray.q.size() >= pkg.sealingTray.size  && flag){
+
+            }
+            else{
+               
+                if(pkg.sealingTray.q.size() < pkg.sealingTray.size)
+                {
+                    pkg.sealingTray.q.add(pkg.currentBottle);
+
+                    if(slg.currentBottle.type==1)
+                    {
+                        pkg.currentBottle = pkg.B1PackagingTray.q.peek();
+                        pkg.B1PackagingTray.q.remove();
+                        slg.B1PackagingTray.q.add(slg.currentBottle);
+                    }   
+                    else{
+                        pkg.currentBottle = pkg.B2PackagingTray.q.peek();
+                        pkg.B2PackagingTray.q.remove();
+                        slg.B2PackagingTray.q.add(slg.currentBottle);
+                    }
+                    slg.currentBottle = slg.sealingTray.q.peek();
+                    slg.sealingTray.q.remove();
+
+                }
+                else
+                {
+                
+                    if(slg.currentBottle.type==1)
+                    {
+                        slg.B1PackagingTray.q.add(slg.currentBottle);
+                        slg.currentBottle = slg.sealingTray.q.peek();
+                        slg.sealingTray.q.remove();
+                        pkg.sealingTray.q.add(pkg.currentBottle);
+                        pkg.currentBottle = pkg.B1PackagingTray.q.peek();
+                        pkg.B1PackagingTray.q.remove();
+                    }   
+                    else{
+                        slg.B2PackagingTray.q.add(slg.currentBottle);
+                        slg.currentBottle = slg.sealingTray.q.peek();
+                        slg.sealingTray.q.remove();
+                        pkg.sealingTray.q.add(pkg.currentBottle);
+                        pkg.currentBottle = pkg.B2PackagingTray.q.peek();
+                        pkg.B1PackagingTray.q.remove();
+                    }
+ 
+                }
+                slg.processingTime=0;
+                slg.pending = false;
+                slg.empty=false;
+                pkg.processingTime=0;
+                pkg.pending = false;
+                pkg.empty=false;        
+            }
+        }
+        else if(pkg.pending){
             if(pkg.sealingTray.q.size() < pkg.sealingTray.size)
             {
                 rel.lock();
@@ -65,15 +126,15 @@ class CustomPhaser extends Phaser {
             }
             else
             {
-                pkg.empty=false;pkg.pending=false;
+                pkg.empty=false;
+                pkg.pending=false;
             }
-           
         }
- 
-         /* At the end of the second, if Sealing unit has completed the sealing of a bottle
+
+        /* At the end of the second, if Sealing unit has completed the sealing of a bottle
         *  then push the bottle into the packaging trays respectively.
         */
-        if(slg.pending)
+        else if(slg.pending)
         {
             rel.lock();
             slg.pending=false;
@@ -89,11 +150,14 @@ class CustomPhaser extends Phaser {
                 slg.empty = true;
                 slg.B2PackagingTray.q.add(slg.currentBottle);
                 System.out.println("transferred to B2 Tray "+ Integer.toString(slg.currentBottle.type) + " "+  Integer.toString(slg.currentBottle.id));
+            }
+            else{
+
             }     
-    
             rel.unlock();
         }          
         
+
         System.out.println("Phase "
 						+ phase 
 						+ " completed.\n"); 
