@@ -52,7 +52,30 @@ class CustomPhaser extends Phaser {
         /* At the end of the second, if Packaging unit has completed the packaging of a bottle
         *  then push the bottle into the sealing tray.
         */
+        if(pkg.pending &&slg.empty)
+        {
+            slg.currentBottle = slg.sealingTray.q.peek();
+            slg.sealingTray.q.remove();
+            slg.empty=false;
+            slg.processingTime=0;   
+        }
+        if(slg.pending&& pkg.empty)
+        {
+            if(slg.currentBottle.type==1)
+            {
+                pkg.currentBottle = pkg.B1PackagingTray.q.peek();
+                pkg.B1PackagingTray.q.remove();
+                pkg.empty=false;
+                pkg.processingTime=0;
+            }   
+            else{
+                pkg.currentBottle = pkg.B2PackagingTray.q.peek();
+                pkg.B2PackagingTray.q.remove();
+                pkg.empty=false;
+                pkg.processingTime=0;
 
+            }   
+        }
         if(pkg.pending && slg.pending){
             boolean flag=false;
             if((slg.currentBottle.type == 1 && slg.B1PackagingTray.q.size() >= slg.B1PackagingTray.size) ||
@@ -124,8 +147,7 @@ class CustomPhaser extends Phaser {
                 pkg.empty=true;
                 rel.unlock();
             }
-            else
-            {
+            else {
                 pkg.empty=false;
                 pkg.pending=false;
             }
