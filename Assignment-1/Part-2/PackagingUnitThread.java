@@ -108,7 +108,7 @@ class PackagingUnitThread implements Runnable {
                     }
                     else{
                         /*else packaging unit is idle*/
-                        System.out.println("IDLEEEEEEEEE");
+                        System.out.println("Packaging unit is IDLE");
                     }
                     /*If sealing is also done then transfer the file to godown*/
                     if(this.currentBottle.sealingStatus == true){

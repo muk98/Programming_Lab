@@ -101,7 +101,7 @@ class SealingUnitThread implements Runnable {
                     else
                     {
                         /*else sealing unit is idle*/
-                        System.out.println("Idleeee");
+                        System.out.println("Sealing unit is IDLE");
                     }
                     
                     /*If packaging is also done then transfer the file to godown else push into required tray accordingly if
