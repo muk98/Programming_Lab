@@ -11,6 +11,8 @@ import java.io.File;
 import java.util.Scanner; 
 import java.awt.event.*; 
 import javax.swing.*;
+import javax.swing.JScrollPane;
+import java.awt.Dimension;
 
 
 public class TrafficLightSystem implements Runnable{
@@ -124,7 +126,8 @@ public class TrafficLightSystem implements Runnable{
             }
             
             /*Change the label of the Status*/
-            String ans = "<html>Time: "+Integer.toString(TrafficLightSystem.time)+" </br>"+PreviousStatus.replaceAll(">", "&gt;").replaceAll("\n", "<br/>")+"</html>";
+            String ans = "<html><head><style>#label{color: #4CAF50;padding-left:150px;padding-right:150px}</style></head>";
+            ans += "<body><div id=\"label\"><h1>Time: "+Integer.toString(TrafficLightSystem.time)+"</h2></br></br>"+PreviousStatus+"</div></body></html>";
             
             /* Semaphore is acquired for time. As we dont want time to change before we display the data*/
             try{
@@ -308,11 +311,11 @@ public class TrafficLightSystem implements Runnable{
             /**If any of the traffic light contains the car id in its finish list then status of car is passed
              * else waiting.
             */
-            ans+="Vehicle: "+Integer.toString(id)+" ";
+            ans+="<h2><strong>Vehicle: </strong>"+Integer.toString(id)+" ";
             if(T1.finishList.contains(id) || T2.finishList.contains(id)||T3.finishList.contains(id)||unrestrictedDir.finishList.contains(id))
-                ans+="Pass\n";
+                ans+="Pass</h2></br>";
             else{
-                ans+="Wait\n";       
+                ans+="Wait</h2></br>";       
             }          
         }
         /**Release the locks*/
@@ -427,9 +430,21 @@ public class TrafficLightSystem implements Runnable{
         panel.add(ui.endStatus);
         panel.add(ui.showStatus);
 
+        // ui.frame.add(scrollPane);
         /**Add the panel to the frame*/
-        ui.frame.add(panel); 
-        ui.frame.setSize(500, 500);
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setBounds(10, 10, 780, 550);
+
+        JPanel contentPane = new JPanel(null);
+        contentPane.setPreferredSize(new Dimension(800, 600));
+        contentPane.add(scrollPane);
+        ui.frame.setContentPane(contentPane);
+
+        // ui.frame.add(panel); 
+        ui.frame.setSize(800, 600);
         
         /**show the frame on the screen*/
         ui.frame.show();

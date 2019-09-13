@@ -54,9 +54,10 @@ class PrintStatusUI extends JFrame implements ActionListener{
             String ans="";
 
             /**Create the required label in the html format*/
-            ans+="<html><head><style>table, th, td {border: 1px solid black;}</style></head><body><h3>Traffic Light Status</h3><br/>";
+            ans += "<html><head><style>#name1{color:#484f4f;}table {border-collapse: collapse;width:70%;}th, td{text-align: left;padding: 8px;} tr:nth-child(even){background-color: blue}th {background-color: #618685;color: white;}";
+            ans+="</style></head><body><h1 id=\"name1\">Traffic Light Status</h1><br/>";
 
-            ans=ans+("<table><tr><th>Traffic Light</th><th>Status</th><th>Time</th></tr>");
+            ans=ans+("<div class=\"traffic\"><table><tr><th>Traffic Light</th><th>Status</th><th>Time</th></tr>");
             if(tid==1){
                 ans=ans+("<tr><th>T1</th><th>Green</th><th>" + Integer.toString(remTime) +"</th></tr>");
             }
@@ -71,18 +72,18 @@ class PrintStatusUI extends JFrame implements ActionListener{
                 ans+=("<tr><th>T2</th><th>Red</th><th>---</th></tr>");
             }
             if(tid==3){
-                ans+=("<tr><th>T3</th><th>Green</th><th>" + Integer.toString(remTime) +"</th></tr>");
+                ans+=("<tr><th>T3</th><th>Green</th><th>" + Integer.toString(remTime) +"</table></th></tr>");
             }
             else{
-                ans+=("<tr><th>T3</th><th>Red</th><th>---</th></tr></table><br/><br/>" );
+                ans+=("<tr><th>T3</th><th>Red</th><th>---</th></tr></table><br/><br/></table></div>" );
             }
-            ans+= "<h3>Current Traffic Status</h3><br/><table><tr><th>Vehicle</th><th>Source</th><th>Destination</th><th>Status</th><th>Remaining Time</th></tr>";
+            ans+= "<h1 id=\"name1\">Current Traffic Status</h1><br/><div overflow-y: auto;><table><tr><th>Vehicle</th><th>Source</th><th>Destination</th><th>Status</th><th>Remaining Time</th></tr>";
             
             /**Get the status of each from all the traffic lights*/
             ans+=(TrafficLightSystem.getDataFromTrafficLight(1));
             ans+=(TrafficLightSystem.getDataFromTrafficLight(2));
             ans+=(TrafficLightSystem.getDataFromTrafficLight(3));
-            ans+=(TrafficLightSystem.getDatafromUD()+ "</table></body></html>");
+            ans+=(TrafficLightSystem.getDatafromUD()+ "</table></div></body></html>");
             
             /**Set the lable */
             label.setText(ans);

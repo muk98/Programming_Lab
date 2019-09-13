@@ -38,7 +38,8 @@ public class OutputScreen extends JFrame implements ActionListener{
 
         /**If show output button is pressed*/
         if(s.equals("Show Output")){
-            String ans = "<html>Time: "+Integer.toString(TrafficLightSystem.time)+"</br>"+TrafficLightSystem.waitorpass().replaceAll(">", "&gt;").replaceAll("\n", "<br/>")+"</html>";
+            String ans = "<html><head><style>table {border-collapse: collapse;width:70%;}th, td{text-align: left;padding: 8px;} tr:nth-child(even){background-color: blue}th {background-color: #4CAF50;color: white;}";
+            ans += "<h2>Time: "+Integer.toString(TrafficLightSystem.time)+"</h2></br></br>"+TrafficLightSystem.waitorpass()+"</body></html>";
             label.setText(ans);
         }
         /**show print status*/
