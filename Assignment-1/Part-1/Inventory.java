@@ -42,6 +42,12 @@ class Inventory{
 	 */
 	public void processOrder(int orderId,char type,int quantity){
 		
+		if(quantity<0)
+		{
+			System.out.println("Order "+ Integer.toString(orderId)+ " is not successful.");
+			this.displayInventory();
+			return;
+		}
 		switch (type) {	
 			case 'S': 
 						/*Check if inventory has sufficient amount to accept the order.*/
