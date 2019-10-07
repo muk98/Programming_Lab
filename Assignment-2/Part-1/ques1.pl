@@ -1,4 +1,4 @@
-convert(_string):- string_chars(_string,X),start(X).
+convert(_string,Count):- string_chars(_string,X),aggregate_all(count,start(X),Count).
 
 checkSingle(X):- X=\=0.
 checkDouble(X,Y):- X=\=0,X<2,!.
@@ -19,6 +19,5 @@ start([X,Y|T]):-  atom_number(X,P),atom_number(Y,Q),checkDouble(P,Q),start(T).
 
 
 
-% start([X,Y|T]) :-
 
 
