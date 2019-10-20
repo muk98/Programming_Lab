@@ -81,11 +81,7 @@ dist(g18, g17,8).
 
 gates([g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14,g15,g16,g17,g18]).
 
-% start(g1).
-% start(g2).
-% start(g3).
-% start(g4).
-start([g1,g2,g3,g4]).
+start([g1]).
 end(g17).
 restr(g7).
 restr(g9).
@@ -113,14 +109,20 @@ validPaths(_):- start(K),start_path(K),fail.
 start_path([H|T]):- path(H,[H]),fail.
 start_path([_|T]):- start_path(T),fail.
 
-path(X,L):- X=='g17',write("Path: "),write(L),nl,!,fail.
-% path(X,L):- restr(X),gates(G),edges(X,G,E1),dfs(E1,L,1),fail.
+path(X,L):- X=='g17',open('ans.txt',append,Stream),write(Stream,"Path: "),write(Stream,L),nl(Stream),close(Stream),!.
+path(X,L):- restr(X),gates(G),edges(X,G,E1),dfs(E1,L,1),!.
 path(X,L):- gates(G),edges(X,G,E1),dfs(E1,L,0),fail.
 
 dfs([],_,_).
-% dfs([H|T],L,1):-H \='na',append(L,[H],L1),path(H,L1),fail.
+dfs([H|T],L,1):-H \='na',append(L,[H],L1),path(H,L1),fail.
+dfs([H|T],L,1):- dfs(T,L,1),!.
 dfs([H|T],L,0):- H \='na',not(member(H,L)),append(L,[H],L1),path(H,L1),fail.
-dfs([H|T],L,Parent):- dfs(T,L,Parent),fail.
+dfs([H|T],L,0):- dfs(T,L,0),fail.
+
+
+
+test(X,1):-open('ans.txt',append,Stream),nl(Stream),write(Stream,'yoddoo'),close(Stream).
+% test(X,0):-write("gh").
 
 
 a(X):- gates(T),edges(X,T,R1),write(R1).
