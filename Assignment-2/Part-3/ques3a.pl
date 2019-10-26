@@ -104,12 +104,24 @@ validPaths(_):- start(K),aggregate_all(count,start_path(K),Count),write(Count).
 start_path([H|_]):- path(H,[H]).
 start_path([_|T]):- start_path(T).
 
-% path(X,L):- X=='g17',open('ans.txt',append,Stream),write(Stream,"Path: "),write(Stream,L),nl(Stream),close(Stream),!.
-path(X,_):- X=='g17',!.
-path(X,L):- restr(X),length(L,Len),Pos is Len-2,nth0(Pos,L,Elem),append(L,[Elem],L1),path(Elem,L1).
+path(X,L):- X=='g17',write("Path: "),write(L),nl,!.
 path(X,L):- gates(G),edges(X,G,E1),dfs(E1,L).
 
 dfs([],_,_).
 dfs([H|_],L):- H \='na',not(member(H,L)),append(L,[H],L1),path(H,L1).
 dfs([_|T],L):- dfs(T,L).
 
+
+optimal(_):-  nb_setval(minDistance, 100000),nb_setval(minPath,[]),start(K), \+ startOpt(K),nb_getval(minPath,L),nb_getval(minDistance,X),write("Distance: "),write(X),nl,write(L).
+
+startOpt([]):-fail.
+startOpt([H|_]):-optPath(H,[H],0),fail.
+startOpt([_|T]):-startOpt(T),fail.
+
+optPath(X,_,_):-restr(X),!.
+optPath(X,L,Dist):-end(X),nb_getval(minDistance, Min),Dist < Min, nb_setval(minDistance, Dist), nb_setval(minPath,L),!.
+optPath(X,L,Dist):-gates(G),edges(X,G,E1),dfs(E1,L,X,Dist).
+
+dfs([],_,_,_).
+dfs([H|_],L,X,Dist):- H \='na',not(member(H,L)),append(L,[H],L1),dist(X,H,Val),D is Dist + Val,optPath(H,L1,D).
+dfs([_|T],L,X,Dist):- dfs(T,L,X,Dist).

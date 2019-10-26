@@ -1,7 +1,7 @@
 convert(_string,Count):- string_chars(_string,X),aggregate_all(count,start(X),Count).
 
 checkSingle(X):- X=\=0.
-checkDouble(X,Y):- X=\=0,X<2,!.
+checkDouble(X,_):- X=\=0,X<2,!.
 checkDouble(X,Y):-X==2,Y<7.
 
 len([],0).
@@ -16,8 +16,5 @@ start([X|T]):-  atom_number(X,Z),checkSingle(Z),start(T).
 
 start([X,Y|T]):-  atom_number(X,P),atom_number(Y,Q),checkDouble(P,Q),checkEmpty(T),!.
 start([X,Y|T]):-  atom_number(X,P),atom_number(Y,Q),checkDouble(P,Q),start(T).
-
-
-
 
 
