@@ -32,8 +32,8 @@ menu('diet',X,Y,Z):- caseZ(X,Y,Z).
 
 menu('hungry',X,Y,Z):- check(X),check(Y),check(Z).
 
-menu('not so hungry',X,Y,Z):- check(X),check(Y),notCheck(Z).
-menu('not so hungry',X,Y,Z):- notCheck(X),check(Y),check(Z).
+menu('not_so_hungry',X,Y,Z):- check(X),check(Y),notCheck(Z).
+menu('not_so_hungry',X,Y,Z):- notCheck(X),check(Y),check(Z).
 
 
 
