@@ -63,7 +63,7 @@ setFixture list slot date = do
     let newList = drop 2 list
     let nextSlot = curr_slot+1
     setFixture newList nextSlot curr_date
-        
+    
  
     
 printFixtures list = do

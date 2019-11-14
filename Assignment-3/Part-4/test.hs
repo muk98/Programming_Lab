@@ -33,9 +33,11 @@ checkColumn (x:xs) pos val count = if val== (x!!pos)
 
 -- checkSubMatrix [] row col val = 
 
-checkSubMatrix x row col val = if val == ((x!!row)!!col) || val == ((x!!row)!!(col+1)) 
+checkSubMatrix x row col val = if val == ((x!!row)!!col) || val == ((x!!row)!!(col+1)) ||  val == ((x!!row)!!(col+2))
                                         then 0
-                                        else if val == ((x!!(row+1))!!col) || val == ((x!!(row+1))!!(col+1))
+                                        else if val == ((x!!(row+1))!!col) || val == ((x!!(row+1))!!(col+1)) || val == ((x!!(row+1))!!(col+2))
+                                            then 0
+                                        else if val == ((x!!(row+2))!!col) || val == ((x!!(row+2))!!(col+1)) || val == ((x!!(row+2))!!(col+2))
                                             then 0
                                             else 1
 
@@ -44,7 +46,7 @@ checkSubMatrix x row col val = if val == ((x!!row)!!col) || val == ((x!!row)!!(c
 putValue:: [[Int]] -> Int -> Int -> Int -> IO Int
 
 putValue list row col val = do
-    if val==5
+    if val==10
         then return 0
         else do
             if elem val (list!!row) 
@@ -56,8 +58,8 @@ putValue list row col val = do
                     let cnt = checkColumn list col val 0
                     if cnt == 0
                         then do
-                            let startRow = (row `div` 2)*2
-                            let startCol = (col `div` 2)*2
+                            let startRow = (row `div` 3)*3
+                            let startCol = (col `div` 3)*3
                             let flag = checkSubMatrix list startRow startCol val 
                             if flag==0
                                 then  (putValue list row col new_val)
@@ -80,7 +82,7 @@ printList (x:xs) = do
 solve:: [[Int]] -> Int -> Int -> IO Int
 
 solve list row col = do
-    if row == 4 
+    if row == 9 
         then do
             f<-getval
             if f==0
@@ -90,7 +92,7 @@ solve list row col = do
                     return 1
                 else return 1            
         else do
-            if col == 4
+            if col == 9
                 then do 
                     let r= row+1
                     solve list r 0
@@ -105,7 +107,7 @@ solve list row col = do
 
                                     
 
-sudoku44 list = do
+sudoku99 list = do
     -- print list
     write 0
     flag <- solve list 0 0
