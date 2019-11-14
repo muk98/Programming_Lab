@@ -111,9 +111,9 @@ check(T) :- \+ T==[].
 * Lastly we check the last gate is end gate or not
 */
 
-valid([Gate1,Gate2|Remaining]):-  start(Start),member(Gate1,Start),dist(Gate1,Gate2,_), valid1([Gate2|Remaining]).
-valid1([Gate1,Gate2|Remaining]):- dist(Gate1,Gate2,_),check(Remaining),valid1([Gate2|Remaining]),!.
-valid1([Gate1,Gate2|Remaining]):- dist(Gate1,Gate2,_),\+ check(Remaining),end(Gate2).
+valid([Gate1,Gate2|Remaining]):- start(Start),member(Gate1,Start),dist(Gate1,Gate2,Value),nb_setval(dist,Value),valid1([Gate2|Remaining]).
+valid1([Gate1,Gate2|Remaining]):- dist(Gate1,Gate2,Val),nb_getval(dist,V),Val1 is V+Val,nb_setval(dist,Val1),check(Remaining),valid1([Gate2|Remaining]),!.
+valid1([Gate1,Gate2|Remaining]):- dist(Gate1,Gate2,Val),nb_getval(dist,V),Val1 is V+Val,nb_setval(dist,Val1),\+ check(Remaining),end(Gate2),write(Val1).
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Part-A %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
