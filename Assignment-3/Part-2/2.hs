@@ -18,9 +18,12 @@ countEm count (x : xs) =    if elem x xs
 
 
 func list = do
-    let newList = join list
-    let allSubString = continuousSubString newList 
-    let sortedList = map sort allSubString
-    let cnt = countEm 0 sortedList
-    print cnt
+    if length list /=2
+        then putStrLn("Incorrect Input")
+        else do
+            let newList = join list
+            let allSubString = continuousSubString newList 
+            let sortedList = map sort allSubString
+            let cnt = countEm 0 sortedList
+            print cnt
     

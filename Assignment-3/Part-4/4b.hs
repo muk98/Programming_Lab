@@ -46,29 +46,33 @@ checkSubMatrix x row col val = if val == ((x!!row)!!col) || val == ((x!!row)!!(c
 putValue:: [[Int]] -> Int -> Int -> Int -> IO Int
 
 putValue list row col val = do
-    if val==10
-        then return 0
+    f<-getval
+    if f==1
+        then return 1
         else do
-            if elem val (list!!row) 
-                then  do
-                    let new_val = val+1
-                    putValue list row col new_val
+            if val==10
+                then return 0
                 else do
-                    let new_val = val+1
-                    let cnt = checkColumn list col val 0
-                    if cnt == 0
-                        then do
-                            let startRow = (row `div` 3)*3
-                            let startCol = (col `div` 3)*3
-                            let flag = checkSubMatrix list startRow startCol val 
-                            if flag==0
-                                then  (putValue list row col new_val)
-                                else do 
-                                    let list1= replace row (replace col val (list!!row))  list 
-                                    let new_col=col+1
-                                    f<-(solve list1 row new_col)
-                                    (putValue list row col new_val)
-                        else  (putValue list row col new_val) 
+                    if elem val (list!!row) 
+                        then  do
+                            let new_val = val+1
+                            putValue list row col new_val
+                        else do
+                            let new_val = val+1
+                            let cnt = checkColumn list col val 0
+                            if cnt == 0
+                                then do
+                                    let startRow = (row `div` 3)*3
+                                    let startCol = (col `div` 3)*3
+                                    let flag = checkSubMatrix list startRow startCol val 
+                                    if flag==0
+                                        then  (putValue list row col new_val)
+                                        else do 
+                                            let list1= replace row (replace col val (list!!row))  list 
+                                            let new_col=col+1
+                                            f<-(solve list1 row new_col)
+                                            (putValue list row col new_val)
+                                else  (putValue list row col new_val) 
 
 
 printList [] = do 
@@ -82,39 +86,54 @@ printList (x:xs) = do
 solve:: [[Int]] -> Int -> Int -> IO Int
 
 solve list row col = do
-    if row == 9 
-        then do
-            f<-getval
-            if f==0
+    f<-getval
+    if f==1
+        then return 1
+        else do
+            if row == 9 
                 then do
                     printList list
                     write 1
                     return 1
-                else return 1            
-        else do
-            if col == 9
-                then do 
-                    let r= row+1
-                    solve list r 0
+                                 
                 else do
-                    let elem = (list!!row)!!col
-                    if elem /=0 
-                        then do
-                            let c=col+1
-                            solve list row c
+                    if col == 9
+                        then do 
+                            let r= row+1
+                            solve list r 0
                         else do
-                            putValue list row col 1
+                            let elem = (list!!row)!!col
+                            if elem /=0 
+                                then do
+                                    let c=col+1
+                                    solve list row c
+                                else do
+                                    putValue list row col 1
 
                                     
 
-sudoku99 list = do
-    -- print list
-    write 0
-    flag <- solve list 0 0
-    f<- getval
-    if f==0
-        then putStrLn ("Not possible")
-        else putStrLn ""
     
 
+check [] = 0                   
+check (x:xs) = if length x/=9
+                    then 1
+                    else if length (filter (>9) x) /=0
+                        then 1
+                        else if length (filter (<0) x) /=0
+                            then 1
+                            else check xs                                
+
+sudoku99 list = do
+    if length list /= 9
+        then putStrLn ("Incorrect Input")
+        else do
+            if check list ==1 
+                then putStrLn ("Incorrect Input")
+                else do
+                    write 0
+                    flag <- solve list 0 0
+                    f<- getval
+                    if f==0
+                        then putStrLn ("Not possible")
+                        else putStrLn ""
 
